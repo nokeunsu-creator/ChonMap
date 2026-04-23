@@ -5,6 +5,9 @@ export interface Person {
   name: string;
   gender: Gender;
   birthYear?: number;
+  deathYear?: number;
+  birthMonthDay?: string; // "MM-DD" 형식 (예: "03-15")
+  deathMonthDay?: string; // "MM-DD" 형식 (기일)
   memo?: string;
 }
 
@@ -22,6 +25,7 @@ export interface FamilyGraph {
   edges: Edge[];
   rootPersonId: string;
   version: number;
+  childOrder?: Record<string, string[]>; // parentId -> ordered child ids
 }
 
 export type Lineage = 'paternal' | 'maternal' | 'self';

@@ -4,3 +4,18 @@ dist
 *.local
 .claude/
 tsconfig.tsbuildinfo
+
+# Android signing / local config
+android/keystore.properties
+android/*.keystore
+android/local.properties
+
+# Android build outputs
+android/build/
+android/app/build/
+android/.gradle/
+android/*.apk
+android/*.apk.idsig
+
+# Personal notes (credentials, accounts)
+정보.txt

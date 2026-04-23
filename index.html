@@ -3,12 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#4F46E5" />
-    <meta name="description" content="한국 촌수 기반 가계도 앱" />
-    <title>촌맵 - 우리 가족 가계도</title>
+    <meta name="theme-color" content="#8B6914" />
+    <meta name="description" content="한국식 8촌 체계 기반의 인터랙티브 가계도 앱. 사람을 탭하면 모든 호칭이 해당 인물 기준으로 자동 계산됩니다. 촌수 계산·친척 호칭·가계도 시각화를 한 번에." />
+    <meta name="keywords" content="촌맵, 가계도, 촌수, 촌수 계산, 친척 호칭, 가족 호칭, 가계도 앱, 족보" />
+    <meta name="author" content="촌맵" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="촌맵 - 한국식 촌수 기반 가계도" />
+    <meta property="og:description" content="탭 한 번이면 모든 호칭이 바뀌는 인터랙티브 가계도. 8촌까지 자동 계산." />
+    <meta property="og:url" content="https://chonmap.vercel.app/" />
+    <meta property="og:image" content="https://chonmap.vercel.app/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="촌맵 - 우리 가족 가계도" />
+    <meta name="twitter:description" content="한국식 촌수·호칭을 자동 계산하는 인터랙티브 가계도 앱." />
+    <link rel="canonical" href="https://chonmap.vercel.app/" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="촌맵" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <title>촌맵 - 한국식 촌수 기반 가계도 | 친척 호칭 자동 계산</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5109908749535030"
+         crossorigin="anonymous"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <header style="background:#8B6914;color:white;padding:16px;text-align:center;">
+          <h1 style="margin:0;font-size:22px;">&#127809; 촌맵 - 한국식 촌수 기반 가계도</h1>
+        </header>
+        <main style="max-width:720px;margin:0 auto;padding:24px 20px;font-family:'Noto Sans KR',sans-serif;line-height:1.8;color:#3D2B1F;">
+          <p style="background:#FFF8E8;padding:14px;border-radius:8px;border-left:4px solid #C4961A;">
+            촌맵을 사용하려면 JavaScript가 활성화된 브라우저가 필요합니다.
+          </p>
+          <h2 style="color:#8B6914;">촌맵이란?</h2>
+          <p>촌맵(ChonMap)은 <strong>한국식 8촌 체계 기반의 인터랙티브 가계도 앱</strong>입니다. 사람을 탭하면 모든 호칭이 해당 인물 기준으로 자동 변경됩니다. 80여 가지 한국식 호칭을 정확히 표시하며, 부계·모계·인척을 구분합니다.</p>
+          <h2 style="color:#8B6914;">주요 기능</h2>
+          <ul>
+            <li>한국식 8촌 자동 계산 (부계·모계·인척 구분)</li>
+            <li>기준 인물 변경 시 호칭 자동 재계산</li>
+            <li>관계 검색 및 경로 시각화</li>
+            <li>가족 템플릿 (핵가족·3대·양가)</li>
+            <li>데이터는 이용자 기기에만 저장 (완전한 프라이버시)</li>
+          </ul>
+          <h2 style="color:#8B6914;">관련 페이지</h2>
+          <ul>
+            <li><a href="/about.html">촌맵 소개</a> - 서비스 개요</li>
+            <li><a href="/guide.html">이용 가이드</a> - 사용법 단계별 설명</li>
+            <li><a href="/chon/">촌수 알아보기</a> - 촌수·호칭 지식 허브</li>
+            <li><a href="/chon/what-is-chon.html">촌수란 무엇인가요?</a></li>
+            <li><a href="/chon/how-to-count.html">촌수 계산법</a></li>
+            <li><a href="/chon/family-titles.html">가족 호칭 총정리</a></li>
+            <li><a href="/chon/family-tree.html">가계도란?</a></li>
+            <li><a href="/chon/holiday-guide.html">명절 친척 호칭 가이드</a></li>
+          </ul>
+          <h2 style="color:#8B6914;">정책 및 문의</h2>
+          <ul>
+            <li><a href="/privacy.html">개인정보처리방침</a></li>
+            <li><a href="/terms.html">이용약관</a></li>
+            <li><a href="/contact.html">문의하기</a></li>
+          </ul>
+        </main>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

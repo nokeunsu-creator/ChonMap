@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 배경: 둥근 사각형 + 따뜻한 갈색 그라데이션 -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5C3D1A"/>
+      <stop offset="100%" stop-color="#3D2B1F"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0D060"/>
+      <stop offset="100%" stop-color="#C4961A"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C4961A"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="50%" stop-color="#E8C547"/>
+      <stop offset="100%" stop-color="#C4961A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+
+  <!-- 나무 줄기 -->
+  <rect x="240" y="280" width="32" height="120" rx="6" fill="url(#trunk)"/>
+
+  <!-- 뿌리 -->
+  <path d="M230 390 Q256 420 282 390" stroke="#8B6914" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- 가지 왼쪽 -->
+  <line x1="256" y1="300" x2="170" y2="240" stroke="url(#trunk)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="260" x2="190" y2="200" stroke="url(#trunk)" stroke-width="6" stroke-linecap="round"/>
+  <line x1="170" y1="240" x2="130" y2="190" stroke="url(#trunk)" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- 가지 오른쪽 -->
+  <line x1="256" y1="300" x2="342" y2="240" stroke="url(#trunk)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="260" x2="322" y2="200" stroke="url(#trunk)" stroke-width="6" stroke-linecap="round"/>
+  <line x1="342" y1="240" x2="382" y2="190" stroke="url(#trunk)" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- 가족 노드들 (원형) -->
+  <!-- 루트 (나) -->
+  <circle cx="256" cy="300" r="24" fill="url(#gold)" stroke="#FFF8DC" stroke-width="3"/>
+
+  <!-- 부모 세대 -->
+  <circle cx="170" cy="240" r="20" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2.5"/>
+  <circle cx="342" cy="240" r="20" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2.5"/>
+
+  <!-- 조부모 세대 -->
+  <circle cx="130" cy="190" r="16" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2"/>
+  <circle cx="190" cy="200" r="16" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2"/>
+  <circle cx="322" cy="200" r="16" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2"/>
+  <circle cx="382" cy="190" r="16" fill="url(#gold)" stroke="#FFF8DC" stroke-width="2"/>
+
+  <!-- 나뭇잎 (상단 크라운) -->
+  <ellipse cx="256" cy="155" rx="150" ry="75" fill="url(#leaf)" opacity="0.2"/>
+  <ellipse cx="200" cy="160" rx="60" ry="45" fill="url(#leaf)" opacity="0.25"/>
+  <ellipse cx="310" cy="155" rx="65" ry="50" fill="url(#leaf)" opacity="0.25"/>
+  <ellipse cx="256" cy="135" rx="80" ry="45" fill="url(#leaf)" opacity="0.3"/>
+
+  <!-- 텍스트 "촌맵" -->
+  <text x="256" y="455" text-anchor="middle" font-size="56" font-weight="800" fill="#F0D060" font-family="sans-serif" letter-spacing="8">촌맵</text>
+</svg>

@@ -1,209 +1,7 @@
 import { Gender } from '../models/types';
+import { InLawType } from './chonCalculator';
 
-// 호칭 룩업 키: "ascent,descent,lineage,targetGender,speakerGender,isInLaw,seniority"
-// seniority: 'elder' | 'younger' | 'any'
-// lineage: 'P' (paternal) | 'M' (maternal)
-
-interface TitleEntry {
-  ascent: number;
-  descent: number;
-  lineage: 'P' | 'M' | '*';    // * = 무관
-  targetGender: Gender | '*';
-  speakerGender: Gender | '*';
-  isInLaw: boolean;
-  seniority: 'elder' | 'younger' | '*';
-  title: string;
-}
-
-const TITLES: TitleEntry[] = [
-  // === 0촌: 본인 ===
-  { ascent: 0, descent: 0, lineage: '*', targetGender: '*', speakerGender: '*', isInLaw: false, seniority: '*', title: '본인' },
-
-  // === 1촌: 부모/자녀 ===
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '아버지' },
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '어머니' },
-  { ascent: 0, descent: 1, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '아들' },
-  { ascent: 0, descent: 1, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '딸' },
-
-  // 1촌 인척: 부모의 배우자, 자녀의 배우자
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '아버지' },
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '어머니' },
-  { ascent: 0, descent: 1, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '사위' },
-  { ascent: 0, descent: 1, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '며느리' },
-
-  // === 배우자 (무촌) ===
-  // 배우자는 chonCalculator에서 직접 처리
-
-  // === 2촌: 조부모/형제/손자녀 ===
-  // 조부모
-  { ascent: 2, descent: 0, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '할아버지' },
-  { ascent: 2, descent: 0, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '할머니' },
-  { ascent: 2, descent: 0, lineage: 'M', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '외할아버지' },
-  { ascent: 2, descent: 0, lineage: 'M', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '외할머니' },
-  // 조부모 인척
-  { ascent: 2, descent: 0, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '할머니' },
-  { ascent: 2, descent: 0, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '할아버지' },
-  { ascent: 2, descent: 0, lineage: 'M', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '외할머니' },
-  { ascent: 2, descent: 0, lineage: 'M', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '외할아버지' },
-
-  // 형제자매
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '형' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '남동생' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '오빠' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '남동생' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '누나' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '여동생' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '언니' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '여동생' },
-
-  // 형제자매 (장유 불명 시 일반 호칭)
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '형제' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '자매' },
-
-  // 형제자매 인척 (형수, 제수, 매형, 매제, 올케, 형부 등)
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: true, seniority: 'elder', title: '형수' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: true, seniority: 'younger', title: '제수씨' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: true, seniority: 'elder', title: '매형' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: true, seniority: 'younger', title: '매제' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: true, seniority: 'elder', title: '올케' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: true, seniority: 'younger', title: '올케' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: true, seniority: 'elder', title: '형부' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: true, seniority: 'younger', title: '제부' },
-
-  // 손자녀
-  { ascent: 0, descent: 2, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '손자' },
-  { ascent: 0, descent: 2, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '손녀' },
-  // 외손자녀 (딸의 자녀)
-  // 외손은 경로에서 판단 — 여기서는 기본 손자/손녀로 처리
-
-  // === 3촌: 삼촌/이모/조카 등 ===
-  // 부계 삼촌/고모
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: 'elder', title: '큰아버지(백부)' },
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: 'younger', title: '작은아버지(숙부)' },
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '고모' },
-  // 부계 3촌 인척
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: 'elder', title: '큰어머니(백모)' },
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: 'younger', title: '작은어머니(숙모)' },
-  { ascent: 2, descent: 1, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '고모부' },
-
-  // 모계 삼촌/이모
-  { ascent: 2, descent: 1, lineage: 'M', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '외삼촌' },
-  { ascent: 2, descent: 1, lineage: 'M', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '이모' },
-  // 모계 3촌 인척
-  { ascent: 2, descent: 1, lineage: 'M', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '외숙모' },
-  { ascent: 2, descent: 1, lineage: 'M', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '이모부' },
-
-  // 조카
-  { ascent: 1, descent: 2, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '조카' },
-  { ascent: 1, descent: 2, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '조카딸' },
-
-  // === 4촌: 사촌/종조부 등 ===
-  // 사촌 (부계)
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '사촌형' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '사촌동생' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '사촌오빠' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '사촌남동생' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '사촌누나' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '사촌여동생' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '사촌언니' },
-  { ascent: 2, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '사촌여동생' },
-
-  // 외사촌 (모계)
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '외사촌형' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '외사촌동생' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '외사촌오빠' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '외사촌남동생' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '외사촌누나' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '외사촌여동생' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '외사촌언니' },
-  { ascent: 2, descent: 2, lineage: 'M', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '외사촌여동생' },
-
-  // 종조부모 (4촌 위)
-  { ascent: 3, descent: 1, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '종조부' },
-  { ascent: 3, descent: 1, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '종조모' },
-  { ascent: 3, descent: 1, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '종조부' },
-  { ascent: 3, descent: 1, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '종조모' },
-
-  // 증조부모
-  { ascent: 3, descent: 0, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '증조할아버지' },
-  { ascent: 3, descent: 0, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '증조할머니' },
-  { ascent: 3, descent: 0, lineage: 'M', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '외증조할아버지' },
-  { ascent: 3, descent: 0, lineage: 'M', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '외증조할머니' },
-
-  // 증손자녀
-  { ascent: 0, descent: 3, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '증손자' },
-  { ascent: 0, descent: 3, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '증손녀' },
-
-  // 종조카 (3촌의 자녀)
-  { ascent: 1, descent: 3, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '종조카' },
-  { ascent: 1, descent: 3, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '종조카딸' },
-
-  // === 5촌: 당숙/종조카 등 ===
-  { ascent: 3, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '당숙(5촌 아저씨)' },
-  { ascent: 3, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '당고모' },
-  { ascent: 2, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '종손(5촌 조카)' },
-  { ascent: 2, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '종질녀' },
-
-  // 5촌 인척
-  { ascent: 3, descent: 2, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '당숙모' },
-  { ascent: 3, descent: 2, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '당고모부' },
-
-  // === 6촌 ===
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '육촌형' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '육촌동생' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '육촌오빠' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '육촌남동생' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '육촌누나' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '육촌여동생' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '육촌언니' },
-  { ascent: 3, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '육촌여동생' },
-
-  // 고조부모 (4촌 위 직계)
-  { ascent: 4, descent: 0, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '고조할아버지' },
-  { ascent: 4, descent: 0, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '고조할머니' },
-
-  // 고손자녀
-  { ascent: 0, descent: 4, lineage: '*', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '고손자' },
-  { ascent: 0, descent: 4, lineage: '*', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '고손녀' },
-
-  // === 7촌 ===
-  { ascent: 4, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '재종숙' },
-  { ascent: 4, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '재종고모' },
-  { ascent: 3, descent: 4, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: false, seniority: '*', title: '재종조카' },
-  { ascent: 3, descent: 4, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: false, seniority: '*', title: '재종질녀' },
-  { ascent: 4, descent: 3, lineage: 'P', targetGender: 'F', speakerGender: '*', isInLaw: true, seniority: '*', title: '재종숙모' },
-  { ascent: 4, descent: 3, lineage: 'P', targetGender: 'M', speakerGender: '*', isInLaw: true, seniority: '*', title: '재종고모부' },
-
-  // === 8촌 ===
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '팔촌형' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'M', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '팔촌동생' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '팔촌오빠' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'M', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '팔촌남동생' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'elder', title: '팔촌누나' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'F', speakerGender: 'M', isInLaw: false, seniority: 'younger', title: '팔촌여동생' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'elder', title: '팔촌언니' },
-  { ascent: 4, descent: 4, lineage: 'P', targetGender: 'F', speakerGender: 'F', isInLaw: false, seniority: 'younger', title: '팔촌여동생' },
-
-  // === 배우자 쪽 (시/처가) ===
-  // 장인/장모 (아내의 부모)
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: true, seniority: '*', title: '장인어른' },
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: true, seniority: '*', title: '장모님' },
-  // 시부모 (남편의 부모)
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: true, seniority: '*', title: '시아버지' },
-  { ascent: 1, descent: 0, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: true, seniority: '*', title: '시어머니' },
-
-  // 처남/처제 (아내의 형제자매)
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'M', isInLaw: true, seniority: '*', title: '처남' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: true, seniority: 'elder', title: '처형' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'M', isInLaw: true, seniority: 'younger', title: '처제' },
-  // 시형제 (남편의 형제자매)
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: true, seniority: 'elder', title: '시숙(아주버님)' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'M', speakerGender: 'F', isInLaw: true, seniority: 'younger', title: '도련님(시동생)' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: true, seniority: 'elder', title: '시누이(형님)' },
-  { ascent: 1, descent: 1, lineage: '*', targetGender: 'F', speakerGender: 'F', isInLaw: true, seniority: 'younger', title: '시누이(아가씨)' },
-];
-
-// 호칭 조회
+// lookupTitle: 경로 분석 결과로 한국식 호칭 결정
 export function lookupTitle(
   ascent: number,
   descent: number,
@@ -211,45 +9,179 @@ export function lookupTitle(
   targetGender: Gender,
   speakerGender: Gender,
   isInLaw: boolean,
+  inLawType: InLawType,
   seniority: 'elder' | 'younger' | 'unknown',
+  maternalDescent: boolean = false,
 ): string {
-  const lin = lineage === 'paternal' ? 'P' : lineage === 'maternal' ? 'M' : '*';
-  const sen = seniority === 'unknown' ? '*' : seniority;
+  const chon = ascent + descent;
 
-  // 정확한 매칭 시도 (구체적 → 일반적)
-  for (const specificity of getMatchOrders(lin, targetGender, speakerGender, sen)) {
-    const match = TITLES.find(t =>
-      t.ascent === ascent &&
-      t.descent === descent &&
-      (t.lineage === specificity.lineage || t.lineage === '*') &&
-      (t.targetGender === specificity.targetGender || t.targetGender === '*') &&
-      (t.speakerGender === specificity.speakerGender || t.speakerGender === '*') &&
-      t.isInLaw === isInLaw &&
-      (t.seniority === specificity.seniority || t.seniority === '*')
-    );
-    if (match) return match.title;
+  // === 0촌: 본인 ===
+  if (chon === 0 && !isInLaw) return '본인';
+
+  // === 배우자 (무촌) — 직접 배우자는 calculateRelationship에서 처리됨 ===
+
+  // === 1촌 ===
+  if (ascent === 1 && descent === 0) {
+    if (inLawType === 'spouse-side') {
+      // 배우자의 부모
+      if (speakerGender === 'M') return targetGender === 'M' ? '장인어른' : '장모님';
+      else return targetGender === 'M' ? '시아버지' : '시어머니';
+    }
+    // 직계 부모 (인척이든 아니든)
+    return targetGender === 'M' ? '아버지' : '어머니';
   }
 
-  // 폴백: 촌수 기반 일반 호칭
-  const chon = ascent + descent;
-  if (chon === 0) return '본인';
-  return `${chon}촌 ${isInLaw ? '인척' : '친족'}`;
-}
+  if (ascent === 0 && descent === 1) {
+    if (inLawType === 'blood-side') {
+      // 자녀의 배우자
+      return targetGender === 'M' ? '사위' : '며느리';
+    }
+    return targetGender === 'M' ? '아들' : '딸';
+  }
 
-function getMatchOrders(
-  lin: string,
-  tg: Gender,
-  sg: Gender,
-  sen: string,
-): Array<{ lineage: string; targetGender: Gender | '*'; speakerGender: Gender | '*'; seniority: string }> {
-  return [
-    { lineage: lin, targetGender: tg, speakerGender: sg, seniority: sen },
-    { lineage: lin, targetGender: tg, speakerGender: sg, seniority: '*' },
-    { lineage: lin, targetGender: tg, speakerGender: '*', seniority: sen },
-    { lineage: lin, targetGender: tg, speakerGender: '*', seniority: '*' },
-    { lineage: '*', targetGender: tg, speakerGender: sg, seniority: sen },
-    { lineage: '*', targetGender: tg, speakerGender: sg, seniority: '*' },
-    { lineage: '*', targetGender: tg, speakerGender: '*', seniority: sen },
-    { lineage: '*', targetGender: tg, speakerGender: '*', seniority: '*' },
-  ];
+  // === 2촌: 조부모/형제/손자 ===
+  if (ascent === 2 && descent === 0) {
+    if (inLawType === 'spouse-side') {
+      // 배우자의 조부모
+      if (speakerGender === 'M') return targetGender === 'M' ? '사장할아버지' : '사장할머니';
+      else return targetGender === 'M' ? '시할아버지' : '시할머니';
+    }
+    if (lineage === 'maternal') return targetGender === 'M' ? '외할아버지' : '외할머니';
+    return targetGender === 'M' ? '할아버지' : '할머니';
+  }
+
+  if (ascent === 0 && descent === 2) {
+    if (maternalDescent) return targetGender === 'M' ? '외손자' : '외손녀';
+    return targetGender === 'M' ? '손자' : '손녀';
+  }
+
+  if (ascent === 1 && descent === 1) {
+    if (inLawType === 'spouse-side') {
+      // 배우자의 형제자매
+      if (speakerGender === 'M') {
+        if (targetGender === 'M') return '처남';
+        return seniority === 'elder' ? '처형' : seniority === 'younger' ? '처제' : '처형/처제';
+      } else {
+        if (targetGender === 'F') return '시누이';
+        return seniority === 'elder' ? '시숙(아주버님)' : seniority === 'younger' ? '도련님(시동생)' : '시형제';
+      }
+    }
+    if (inLawType === 'blood-side') {
+      // 형제자매의 배우자
+      if (speakerGender === 'M') {
+        if (targetGender === 'F') return seniority === 'elder' ? '형수' : '제수씨';
+        return seniority === 'elder' ? '매형' : '매제';
+      } else {
+        if (targetGender === 'F') return '올케';
+        return seniority === 'elder' ? '형부' : '제부';
+      }
+    }
+    // 혈연 형제자매
+    const s = seniority;
+    if (speakerGender === 'M') {
+      if (targetGender === 'M') return s === 'elder' ? '형' : s === 'younger' ? '남동생' : '형제';
+      return s === 'elder' ? '누나' : s === 'younger' ? '여동생' : '자매';
+    } else {
+      if (targetGender === 'M') return s === 'elder' ? '오빠' : s === 'younger' ? '남동생' : '형제';
+      return s === 'elder' ? '언니' : s === 'younger' ? '여동생' : '자매';
+    }
+  }
+
+  // === 3촌: 삼촌/이모/조카 ===
+  if (ascent === 2 && descent === 1) {
+    if (inLawType === 'blood-side') {
+      // 삼촌/고모의 배우자
+      if (lineage === 'paternal') {
+        if (targetGender === 'F') return seniority === 'elder' ? '큰어머니(백모)' : '작은어머니(숙모)';
+        return '고모부';
+      }
+      return targetGender === 'F' ? '외숙모' : '이모부';
+    }
+    // 혈연 삼촌/고모/이모
+    if (lineage === 'paternal') {
+      if (targetGender === 'M') return seniority === 'elder' ? '큰아버지(백부)' : seniority === 'younger' ? '작은아버지(숙부)' : '삼촌';
+      return '고모';
+    }
+    if (targetGender === 'M') return '외삼촌';
+    return '이모';
+  }
+
+  if (ascent === 1 && descent === 2) {
+    return targetGender === 'M' ? '조카' : '조카딸';
+  }
+
+  // === 증조/증손 (직계 3촌) ===
+  if (ascent === 3 && descent === 0) {
+    if (lineage === 'maternal') return targetGender === 'M' ? '외증조할아버지' : '외증조할머니';
+    return targetGender === 'M' ? '증조할아버지' : '증조할머니';
+  }
+  if (ascent === 0 && descent === 3) return targetGender === 'M' ? '증손자' : '증손녀';
+
+  // === 4촌 ===
+  if (ascent === 2 && descent === 2) {
+    const prefix = lineage === 'maternal' ? '외사촌' : '사촌';
+    const s = seniority;
+    if (speakerGender === 'M') {
+      if (targetGender === 'M') return s === 'elder' ? `${prefix}형` : s === 'younger' ? `${prefix}동생` : prefix;
+      return s === 'elder' ? `${prefix}누나` : s === 'younger' ? `${prefix}여동생` : prefix;
+    } else {
+      if (targetGender === 'M') return s === 'elder' ? `${prefix}오빠` : s === 'younger' ? `${prefix}남동생` : prefix;
+      return s === 'elder' ? `${prefix}언니` : s === 'younger' ? `${prefix}여동생` : prefix;
+    }
+  }
+
+  if (ascent === 3 && descent === 1) {
+    if (targetGender === 'M') {
+      return seniority === 'elder' ? '큰할아버지' : seniority === 'younger' ? '작은할아버지' : '종조부';
+    }
+    return seniority === 'elder' ? '큰할머니' : seniority === 'younger' ? '작은할머니' : '종조모';
+  }
+  if (ascent === 1 && descent === 3) return targetGender === 'M' ? '종조카' : '종조카딸';
+
+  // 고조부모/고손
+  if (ascent === 4 && descent === 0) return targetGender === 'M' ? '고조할아버지' : '고조할머니';
+  if (ascent === 0 && descent === 4) return targetGender === 'M' ? '고손자' : '고손녀';
+
+  // === 5촌 ===
+  if (ascent === 3 && descent === 2) {
+    if (inLawType === 'blood-side') return targetGender === 'F' ? '당숙모' : '당고모부';
+    return targetGender === 'M' ? '당숙(5촌 아저씨)' : '당고모';
+  }
+  if (ascent === 2 && descent === 3) return targetGender === 'M' ? '5촌 조카' : '5촌 조카딸';
+
+  // === 6촌 ===
+  if (ascent === 3 && descent === 3) {
+    const s = seniority;
+    if (speakerGender === 'M') {
+      if (targetGender === 'M') return s === 'elder' ? '육촌형' : s === 'younger' ? '육촌동생' : '육촌';
+      return s === 'elder' ? '육촌누나' : s === 'younger' ? '육촌여동생' : '육촌';
+    } else {
+      if (targetGender === 'M') return s === 'elder' ? '육촌오빠' : s === 'younger' ? '육촌남동생' : '육촌';
+      return s === 'elder' ? '육촌언니' : s === 'younger' ? '육촌여동생' : '육촌';
+    }
+  }
+
+  // === 7촌 ===
+  if (ascent === 4 && descent === 3) {
+    if (inLawType === 'blood-side') return targetGender === 'F' ? '재종숙모' : '재종고모부';
+    return targetGender === 'M' ? '재종숙' : '재종고모';
+  }
+  if (ascent === 3 && descent === 4) return targetGender === 'M' ? '재종조카' : '재종질녀';
+
+  // === 8촌 ===
+  if (ascent === 4 && descent === 4) {
+    const s = seniority;
+    if (speakerGender === 'M') {
+      if (targetGender === 'M') return s === 'elder' ? '팔촌형' : s === 'younger' ? '팔촌동생' : '팔촌';
+      return s === 'elder' ? '팔촌누나' : s === 'younger' ? '팔촌여동생' : '팔촌';
+    } else {
+      if (targetGender === 'M') return s === 'elder' ? '팔촌오빠' : s === 'younger' ? '팔촌남동생' : '팔촌';
+      return s === 'elder' ? '팔촌언니' : s === 'younger' ? '팔촌여동생' : '팔촌';
+    }
+  }
+
+  // === 폴백 ===
+  if (chon === 0) return '본인';
+  if (isInLaw) return `인척 (${chon > 0 ? chon + '촌' : ''})`;
+  return `${chon}촌 친족`;
 }

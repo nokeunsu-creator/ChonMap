@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chonmap.vercel.app/sitemap.xml

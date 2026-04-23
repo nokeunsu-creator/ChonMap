@@ -3,8 +3,8 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.chonmap.app",
-      "sha256_cert_fingerprints": ["__TODO_SIGNING_KEY_SHA256__"]
+      "package_name": "app.vercel.chonmap.twa",
+      "sha256_cert_fingerprints": ["E2:72:49:13:7F:97:5B:41:26:AC:F3:A5:3F:8D:4F:30:A5:6A:20:38:13:B1:B3:44:4E:8D:B2:C0:58:EC:2F:A3"]
     }
   }
 ]

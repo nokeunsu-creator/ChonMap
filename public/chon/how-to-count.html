@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>촌수 계산법 | 1촌부터 8촌까지 완전 정리 | 촌맵</title>
+  <meta name="description" content="촌수는 어떻게 세나요? 1촌·2촌·3촌·4촌·5촌·6촌·7촌·8촌 관계를 예시와 함께 쉽게 정리했습니다. 계산 규칙과 헷갈리는 사례까지.">
+  <meta name="keywords" content="촌수 계산, 촌수 세는법, 촌수 계산법, 1촌 2촌 3촌 4촌 5촌 6촌 7촌 8촌">
+  <meta property="og:title" content="촌수 계산법 완전 정리">
+  <meta property="og:description" content="1촌부터 8촌까지 한국식 촌수 계산 방법을 한눈에 이해할 수 있습니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://chonmap.vercel.app/chon/how-to-count.html">
+  <meta property="og:image" content="https://chonmap.vercel.app/icons/icon-512.png">
+  <link rel="canonical" href="https://chonmap.vercel.app/chon/how-to-count.html">
+  <link rel="stylesheet" href="/shared/layout.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5109908749535030" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="site-logo">촌맵<span class="subtitle">한국식 가계도</span></a>
+    <nav class="site-nav">
+      <a href="/">홈</a>
+      <a href="/guide.html">이용 가이드</a>
+      <a href="/chon/">촌수 알아보기</a>
+      <a href="/about.html">소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>촌수 계산법 완전 정리</h1>
+    <p class="meta">1촌부터 8촌까지 실제 사례로 익히는 촌수 계산</p>
+
+    <div class="lead">
+      촌수는 <strong>두 사람을 잇는 가계도 위 선의 개수</strong>로 계산합니다. 규칙은 간단하지만, 부부(배우자) 사이에는 촌수가 없다는 점과 부모-자식 관계를 건너는 것만 한 단계로 친다는 점을 기억하면 누구나 쉽게 계산할 수 있습니다.
+    </div>
+
+    <h2>기본 계산 규칙 3가지</h2>
+    <ol>
+      <li><strong>부모-자식 간 이동은 1촌</strong>: 한 세대를 위 또는 아래로 넘어가면 1촌이 더해집니다.</li>
+      <li><strong>배우자 간 이동은 0촌</strong>: 부부는 하나로 봅니다. 형수를 계산할 때 "형(2촌) → 형수(2촌)"이 되는 이유입니다.</li>
+      <li><strong>공통 조상까지 올라갔다가 내려온다</strong>: 직계가 아닌 관계는 공통 조상을 찾아 "올라간 칸 + 내려온 칸"으로 셉니다.</li>
+    </ol>
+
+    <h2>1촌 - 부모와 자녀</h2>
+    <p>가장 가까운 혈연 관계입니다. 한 세대 차이로 부모-자식 관계를 이룹니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>경로</th></tr></thead>
+      <tbody>
+        <tr><td>아버지 · 어머니</td><td>아버지 / 어머니</td><td>나 → 부모 (1단계)</td></tr>
+        <tr><td>아들 · 딸</td><td>아들 / 딸</td><td>나 → 자녀 (1단계)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2촌 - 형제자매, 조부모, 손자녀</h2>
+    <p>세대가 같은 형제자매와, 두 세대 차이인 조부모·손자녀가 모두 2촌입니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>경로</th></tr></thead>
+      <tbody>
+        <tr><td>형제자매</td><td>형, 누나, 오빠, 언니, 동생</td><td>나 → 부모 → 형제자매</td></tr>
+        <tr><td>조부모</td><td>할아버지, 할머니, 외할아버지, 외할머니</td><td>나 → 부모 → 조부모</td></tr>
+        <tr><td>손자녀</td><td>손자, 손녀</td><td>나 → 자녀 → 손자녀</td></tr>
+      </tbody>
+    </table>
+    <p>여기서 <strong>외조부모는 어머니의 부모</strong>입니다. 촌수는 같지만 부계·모계에 따라 호칭이 달라집니다.</p>
+
+    <h2>3촌 - 삼촌, 이모, 조카</h2>
+    <p>부모의 형제자매, 또는 형제자매의 자녀입니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>경로</th></tr></thead>
+      <tbody>
+        <tr><td>아버지의 형</td><td>큰아버지(백부)</td><td>나 → 아버지 → 할아버지 → 큰아버지</td></tr>
+        <tr><td>아버지의 남동생</td><td>작은아버지(숙부)</td><td>나 → 아버지 → 할아버지 → 작은아버지</td></tr>
+        <tr><td>아버지의 자매</td><td>고모</td><td>나 → 아버지 → 할아버지 → 고모</td></tr>
+        <tr><td>어머니의 남형제</td><td>외삼촌</td><td>나 → 어머니 → 외할아버지 → 외삼촌</td></tr>
+        <tr><td>어머니의 자매</td><td>이모</td><td>나 → 어머니 → 외할아버지 → 이모</td></tr>
+        <tr><td>형제자매의 자녀</td><td>조카, 조카딸</td><td>나 → 부모 → 형제자매 → 조카</td></tr>
+      </tbody>
+    </table>
+    <p>공통 조상(조부모)까지 2단계 올라갔다가 1단계 내려오므로 <strong>2 + 1 = 3촌</strong>이 됩니다.</p>
+
+    <h2>4촌 - 사촌, 종조부(큰할아버지), 증조부모</h2>
+    <p>사촌은 부모의 형제자매의 자녀, 즉 같은 조부모를 둔 사이입니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>경로</th></tr></thead>
+      <tbody>
+        <tr><td>아버지 쪽 사촌</td><td>사촌(형/누나/동생)</td><td>나 → 아버지 → 할아버지 → 큰·작은아버지 → 사촌</td></tr>
+        <tr><td>어머니 쪽 사촌</td><td>외사촌</td><td>나 → 어머니 → 외할아버지 → 외삼촌 → 외사촌</td></tr>
+        <tr><td>할아버지의 형</td><td>큰할아버지(종조부)</td><td>나 → 아버지 → 할아버지 → 증조할아버지 → 큰할아버지</td></tr>
+        <tr><td>증조부모</td><td>증조할아버지, 증조할머니</td><td>나 → 부 → 조 → 증조(3단계)</td></tr>
+      </tbody>
+    </table>
+    <p>사촌은 조부모까지 2단계 올라가 삼촌 거쳐 2단계 내려오니 <strong>2 + 2 = 4촌</strong>입니다.</p>
+
+    <h2>5촌 - 당숙, 5촌 조카</h2>
+    <p>사촌의 자녀, 또는 부모의 사촌에 해당합니다. 같은 세대에서는 나오지 않고 한 세대 위·아래로만 존재합니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>경로</th></tr></thead>
+      <tbody>
+        <tr><td>아버지의 사촌(남성)</td><td>당숙 (오촌 아저씨)</td><td>공통 조상: 증조부</td></tr>
+        <tr><td>아버지의 사촌(여성)</td><td>당고모</td><td>공통 조상: 증조부</td></tr>
+        <tr><td>사촌의 자녀</td><td>5촌 조카</td><td>공통 조상: 할아버지</td></tr>
+      </tbody>
+    </table>
+
+    <h2>6촌 - 육촌</h2>
+    <p>증조부모를 공통 조상으로 하는 사이입니다. 내 부모와 사촌이라면, 그 자녀와 나는 6촌이 됩니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th><th>공통 조상</th></tr></thead>
+      <tbody>
+        <tr><td>6촌 (당질, 재종간)</td><td>육촌 형제, 육촌 누이, 재종형제</td><td>증조부모</td></tr>
+      </tbody>
+    </table>
+    <p>경로: 나 → 부 → 조 → 증조 → 당숙 → 육촌 (3단계 상승 + 3단계 하강 = 6촌)</p>
+
+    <h2>7촌 - 재종숙, 재종조카</h2>
+    <p>고조부모를 공통 조상으로 하며, 세대가 하나 어긋납니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th></tr></thead>
+      <tbody>
+        <tr><td>재종숙(7촌 위)</td><td>재종숙</td></tr>
+        <tr><td>재종조카(7촌 아래)</td><td>재종조카, 재종질녀</td></tr>
+      </tbody>
+    </table>
+
+    <h2>8촌 - 팔촌</h2>
+    <p>민법상 친족의 경계선입니다. 고조부모를 공통 조상으로 하는 같은 세대입니다. 한 집안의 가장 바깥쪽 친족으로 여겨집니다.</p>
+    <table>
+      <thead><tr><th>관계</th><th>호칭</th></tr></thead>
+      <tbody>
+        <tr><td>8촌 형제자매</td><td>팔촌 형/누나/동생 (삼종형제)</td></tr>
+      </tbody>
+    </table>
+    <p>경로: 나 → 부 → 조 → 증조 → 고조 → 고조의 다른 자녀 → 그 자녀 → 그 자녀 → 8촌 (4단계 상승 + 4단계 하강)</p>
+
+    <h2>헷갈리기 쉬운 사례</h2>
+    <h3>1. 형수는 몇 촌인가요?</h3>
+    <p>형과 형수는 부부(무촌)이므로, <strong>형수는 나와 2촌 관계인 인척</strong>입니다. 촌수는 형과 같지만 호칭은 "형수"로 다릅니다.</p>
+    <h3>2. 사돈은 촌수가 있나요?</h3>
+    <p>사돈은 친족 체계 바깥입니다. 형제자매의 배우자의 부모 등은 엄밀히 말하면 친족 범위를 벗어난 <strong>사회적 관계</strong>로, 촌수를 계산하지 않습니다.</p>
+    <h3>3. 배우자의 삼촌은 몇 촌?</h3>
+    <p>배우자는 무촌이므로 건너뛰고, 배우자의 3촌이 곧 내 3촌 인척이 됩니다. 다만 호칭은 혈족 3촌과 다릅니다(예: 배우자의 외삼촌은 "처외삼촌").</p>
+
+    <h2>촌맵으로 자동 계산하기</h2>
+    <p>직접 계산하기 복잡한 관계도 촌맵에 가족을 입력하면 <strong>자동으로 촌수와 호칭</strong>이 표시됩니다. 기준 인물을 바꾸면 그 사람의 시선에서 다시 계산됩니다. 관계검색 기능으로 두 사람 간의 촌수와 경로를 바로 확인할 수 있습니다.</p>
+
+    <a href="/" class="cta">&rarr; 촌맵에서 내 가족 촌수 계산하기</a>
+
+    <div class="related">
+      <h3>이어서 읽기</h3>
+      <ul>
+        <li><a href="/chon/what-is-chon.html">촌수란 무엇인가요?</a></li>
+        <li><a href="/chon/family-titles.html">가족 호칭 총정리 - 부계·모계·인척 80가지</a></li>
+        <li><a href="/chon/family-tree.html">가계도 만드는 법</a></li>
+        <li><a href="/chon/holiday-guide.html">명절 친척 호칭 가이드</a></li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a href="/about.html">소개</a> ·
+      <a href="/guide.html">이용 가이드</a> ·
+      <a href="/privacy.html">개인정보처리방침</a> ·
+      <a href="/terms.html">이용약관</a>
+      <br>
+      <a href="/contact.html">문의</a>
+    </div>
+    <div class="copyright">© 2026 촌맵(ChonMap). All rights reserved.</div>
+  </footer>
+</body>
+</html>

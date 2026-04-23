@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>촌맵 기능 그래픽 생성</title>
+<style>
+  body { margin: 0; padding: 20px; background: #f0f0f0; font-family: 'Malgun Gothic', sans-serif; }
+  .info { max-width: 1024px; margin: 0 auto 20px; padding: 16px; background: white; border-radius: 8px; }
+  .info h2 { margin: 0 0 8px; }
+  .info button { background: #8B6914; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+  .info button:hover { background: #C4961A; }
+  canvas { display: block; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+</style>
+</head>
+<body>
+<div class="info">
+  <h2>촌맵 기능 그래픽 (1024 × 500)</h2>
+  <p>아래 미리보기를 확인하고 <strong>"PNG 다운로드"</strong> 버튼을 눌러 저장하세요.</p>
+  <button onclick="download()">PNG 다운로드</button>
+</div>
+<canvas id="c" width="1024" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Gradient background
+const grad = ctx.createLinearGradient(0, 0, 1024, 500);
+grad.addColorStop(0, '#C4961A');
+grad.addColorStop(1, '#8B6914');
+ctx.fillStyle = grad;
+ctx.fillRect(0, 0, 1024, 500);
+
+// Decorative circles
+ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+ctx.beginPath();
+ctx.arc(990, 50, 170, 0, Math.PI * 2);
+ctx.fill();
+ctx.beginPath();
+ctx.arc(40, 520, 140, 0, Math.PI * 2);
+ctx.fill();
+
+// Small tree icon (decorative leaf shape)
+ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+ctx.font = '140px serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('🌳', 150, 140);
+ctx.fillText('🌳', 870, 370);
+
+// Title
+ctx.fillStyle = 'white';
+ctx.font = 'bold 130px "Malgun Gothic", sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+ctx.shadowBlur = 8;
+ctx.shadowOffsetY = 3;
+ctx.fillText('촌맵', 512, 200);
+
+// Subtitle
+ctx.shadowBlur = 0;
+ctx.shadowOffsetY = 0;
+ctx.fillStyle = '#F5F0E0';
+ctx.font = '38px "Malgun Gothic", sans-serif';
+ctx.fillText('한국식 촌수 기반 가계도', 512, 310);
+
+// Tagline
+ctx.fillStyle = 'rgba(245, 240, 224, 0.85)';
+ctx.font = '22px "Malgun Gothic", sans-serif';
+ctx.fillText('탭 한 번으로 80가지 호칭이 자동으로 바뀝니다', 512, 380);
+
+// Decorative line
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(362, 250);
+ctx.lineTo(662, 250);
+ctx.stroke();
+
+function download() {
+  const link = document.createElement('a');
+  link.download = 'feature-graphic.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
