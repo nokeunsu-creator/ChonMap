@@ -10,7 +10,7 @@ import { Baduk } from './games/Baduk';
 import { Janggi } from './games/Janggi';
 import { Chess } from './games/Chess';
 import {
-  BadukQuizGame, ProverbQuizGame, SpellingQuizGame, FlagQuizGame,
+  ProverbQuizGame, SpellingQuizGame, FlagQuizGame,
   ContinentQuizGame, DinosaurQuizGame, SpaceQuizGame, HanjaQuizGame,
   LogicQuizGame, SafetyQuizGame,
   BadukClassroomGame, EnglishChampionshipGame, HistoryQuizGame, ScienceQuizGame,
@@ -22,7 +22,7 @@ type GameId =
   | 'hub'
   | 'kinship' | 'twentyfour' | 'memory' | 'whack'
   | 'omok' | 'baduk' | 'janggi' | 'chess'
-  | 'baduk-quiz' | 'proverb' | 'spelling' | 'flag' | 'continent'
+  | 'proverb' | 'spelling' | 'flag' | 'continent'
   | 'dinosaur' | 'space' | 'hanja' | 'logic' | 'safety'
   | 'baduk-classroom' | 'english-championship' | 'history' | 'science' | 'nonsense'
   | 'word-matching' | 'math-speed' | 'shape' | 'math-champ'
@@ -61,8 +61,10 @@ const GAMES: GameMeta[] = [
   { id: 'janggi', category: 'strategy', icon: '\u{265F}', title: '장기', desc: '한국 전통', tag: '전략' },
   { id: 'chess',  category: 'strategy', icon: '\u{2654}', title: '체스', desc: '체크메이트!', tag: '전략' },
 
-  // 학습 — GradeQuiz 기반 10개
-  { id: 'baduk-quiz', category: 'learn', icon: '❓',  title: '바둑 퀴즈',    desc: '학년별 객관식', tag: '바둑' },
+  // 학습 — 바둑 교실 (앞쪽)
+  { id: 'baduk-classroom', category: 'learn', icon: '♟', title: '바둑 교실', desc: '58개 레슨 퍼즐', tag: '바둑' },
+
+  // 학습 — GradeQuiz 기반
   { id: 'proverb',    category: 'learn', icon: '📜', title: '사자성어/속담', desc: '사자성어/속담', tag: '국어' },
   { id: 'spelling',   category: 'learn', icon: '✏️', title: '맞춤법',       desc: '올바른 표기', tag: '국어' },
   { id: 'flag',       category: 'learn', icon: '🌍', title: '세계 국기',    desc: '국기/수도', tag: '사회' },
@@ -74,7 +76,6 @@ const GAMES: GameMeta[] = [
   { id: 'safety',     category: 'learn', icon: '🛡️', title: '안전/생활',    desc: '생활 상식', tag: '상식' },
 
   // 학습 — 독립 게임
-  { id: 'baduk-classroom',     category: 'learn', icon: '♟',  title: '바둑 교실',    desc: '58개 레슨 퍼즐',   tag: '바둑' },
   { id: 'english-championship',category: 'learn', icon: '🇺🇸', title: '영어 챔피언',   desc: '단어/문장 종합',   tag: '영어' },
   { id: 'history',             category: 'learn', icon: '🏯', title: '한국사 퀴즈',   desc: '10주제 200문',    tag: '사회' },
   { id: 'science',             category: 'learn', icon: '🔬', title: '과학 퀴즈',     desc: '10주제 200문',    tag: '과학' },
@@ -109,7 +110,6 @@ export function PlayHub() {
   if (current === 'chess')      return <Chess onBack={goBack} />;
 
   // GradeQuiz 기반
-  if (current === 'baduk-quiz') return <BadukQuizGame onBack={goBack} />;
   if (current === 'proverb')    return <ProverbQuizGame onBack={goBack} />;
   if (current === 'spelling')   return <SpellingQuizGame onBack={goBack} />;
   if (current === 'flag')       return <FlagQuizGame onBack={goBack} />;
