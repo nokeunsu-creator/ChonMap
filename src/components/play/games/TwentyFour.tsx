@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 const TARGET = 24;
 const EPS = 1e-6;
@@ -140,6 +142,7 @@ export function TwentyFour({ onBack }: GameProps) {
   };
 
   const nextPuzzle = () => {
+    if (solved) maybeFireGameOverAd('24점 퍼즐');
     setPuzzle(generatePuzzle());
     setInput('');
     setFeedback(null);
@@ -245,6 +248,8 @@ export function TwentyFour({ onBack }: GameProps) {
         <div style={{ marginTop: 14, fontSize: 11, color: textSecondary, textAlign: 'center', lineHeight: 1.6 }}>
           키 {puzzleKey} · +, −, ×, ÷ 와 괄호를 사용해 24를 만드세요
         </div>
+
+        <div style={{ marginTop: 20 }}><AdBanner /></div>
       </div>
     </>
   );

@@ -3,6 +3,8 @@ import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { useAndroidBack } from '../../../utils/useAndroidBack';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const ROWS = 10;
@@ -968,12 +970,14 @@ export function Janggi({ onBack }: GameProps) {
         </div>
       </div>
 
+      {winner && <div style={{ margin: '0 12px 12px' }}><AdBanner /></div>}
+
       {showResetConfirm && (
         <ConfirmDialog
           message="현재 게임을 종료하고 새 게임을 시작할까요?"
           confirmLabel="새 게임"
           dark={dark}
-          onConfirm={() => { doReset(); setShowResetConfirm(false); }}
+          onConfirm={() => { maybeFireGameOverAd('장기'); doReset(); setShowResetConfirm(false); }}
           onCancel={() => setShowResetConfirm(false)}
         />
       )}

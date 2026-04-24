@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 const EMOJI_POOL = [
   '🍎','🍌','🍇','🍓','🍑','🍉','🥕','🌽',
@@ -237,12 +239,13 @@ export function MemoryGame({ onBack }: GameProps) {
                   <div style={{ fontSize: 12, color: goldColor, marginTop: 6, fontWeight: 700 }}>🏆 신기록!</div>
                 )}
                 <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                  <button onClick={() => startGame(diff)} style={{ ...startBtn, flex: 1 }}>다시 하기</button>
+                  <button onClick={() => { maybeFireGameOverAd('카드 뒤집기'); startGame(diff); }} style={{ ...startBtn, flex: 1 }}>다시 하기</button>
                   <button onClick={() => setPhase('setup')} style={{
                     flex: 1, background: 'none', border: `1px solid ${cardBorder}`,
                     borderRadius: 14, padding: 14, fontSize: 14, color: textSecondary, cursor: 'pointer',
                   }}>난이도 선택</button>
                 </div>
+                <div style={{ marginTop: 16 }}><AdBanner /></div>
               </div>
             )}
           </>

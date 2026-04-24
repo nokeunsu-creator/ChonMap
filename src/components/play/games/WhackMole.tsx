@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 const GRID_SIZE = 9; // 3x3
 const GAME_SECONDS = 30;
@@ -270,12 +272,13 @@ export function WhackMole({ onBack }: GameProps) {
                   최고 점수: {stats.highScore}
                 </div>
                 <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                  <button onClick={start} style={{ ...startBtn, flex: 1 }}>다시 하기</button>
+                  <button onClick={() => { maybeFireGameOverAd('두더지 잡기'); start(); }} style={{ ...startBtn, flex: 1 }}>다시 하기</button>
                   <button onClick={() => setPhase('idle')} style={{
                     flex: 1, background: 'none', border: `1px solid ${cardBorder}`,
                     borderRadius: 14, padding: 14, fontSize: 14, color: textSecondary, cursor: 'pointer',
                   }}>처음으로</button>
                 </div>
+                <div style={{ marginTop: 16 }}><AdBanner /></div>
               </div>
             )}
           </>

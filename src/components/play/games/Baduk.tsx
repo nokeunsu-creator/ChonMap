@@ -3,6 +3,8 @@ import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { useAndroidBack } from '../../../utils/useAndroidBack';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 type Color = 'black' | 'white';
 type Cell = Color | null;
@@ -953,7 +955,7 @@ export function Baduk({ onBack }: GameProps) {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => startGame(size)}
+              <button onClick={() => { maybeFireGameOverAd('바둑'); startGame(size); }}
                 style={{ padding: '10px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', background: goldColor, color: '#FFF', fontSize: 14, fontWeight: 600 }}>
                 다시 하기
               </button>
@@ -975,6 +977,7 @@ export function Baduk({ onBack }: GameProps) {
                 Lv.{aiLevel} ({getLevelLabel(aiLevel)})
               </div>
             )}
+            <div style={{ marginTop: 16 }}><AdBanner /></div>
           </div>
         )}
       </div>

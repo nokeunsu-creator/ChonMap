@@ -3,6 +3,8 @@ import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { useAndroidBack } from '../../../utils/useAndroidBack';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 const SIZE = 15;
 type Stone = 'black' | 'white' | null;
@@ -456,6 +458,8 @@ export function Omok({ onBack }: GameProps) {
             }))}
           </svg>
         </div>
+
+        {winner && <div style={{ marginTop: 16 }}><AdBanner /></div>}
       </div>
 
       {showResetConfirm && (
@@ -463,7 +467,7 @@ export function Omok({ onBack }: GameProps) {
           message="현재 게임을 종료하고 새 게임을 시작할까요?"
           confirmLabel="새 게임"
           dark={dark}
-          onConfirm={() => { doReset(); setShowResetConfirm(false); }}
+          onConfirm={() => { maybeFireGameOverAd('오목'); doReset(); setShowResetConfirm(false); }}
           onCancel={() => setShowResetConfirm(false)}
         />
       )}

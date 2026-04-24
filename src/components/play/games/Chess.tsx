@@ -3,6 +3,8 @@ import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { useAndroidBack } from '../../../utils/useAndroidBack';
+import { AdBanner } from '../../ads/AdBanner';
+import { maybeFireGameOverAd } from '../../ads/GameAd';
 
 type PieceCode = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p';
 type Cell = PieceCode | null;
@@ -876,7 +878,7 @@ export function Chess({ onBack }: GameProps) {
               {statusText}
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-              <button onClick={doReset}
+              <button onClick={() => { maybeFireGameOverAd('체스'); doReset(); }}
                 style={{ padding: '10px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', background: goldColor, color: '#FFF', fontSize: 14, fontWeight: 600 }}>
                 다시 하기
               </button>
@@ -885,6 +887,7 @@ export function Chess({ onBack }: GameProps) {
                 게임 목록
               </button>
             </div>
+            <div style={{ marginTop: 16 }}><AdBanner /></div>
           </div>
         )}
       </div>

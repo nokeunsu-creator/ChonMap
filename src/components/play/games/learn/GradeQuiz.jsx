@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { submitQuizScore } from '../../../../utils/pm/stubs'
+import { AdBanner } from '../../../ads/AdBanner'
+import { maybeFireGameOverAd } from '../../../ads/GameAd'
 
 const STORAGE_PREFIX = 'grade-quiz-'
 const PLAYER_KEY = 'grade-quiz-player'
@@ -179,7 +181,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
         )}
 
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => startQuiz(grade)}
+          <button onClick={() => { maybeFireGameOverAd(title); startQuiz(grade) }}
             style={{ flex: 1, padding: '14px 0', borderRadius: 12, border: 'none', cursor: 'pointer', background: color, color: '#FFF', fontSize: 15, fontWeight: 700 }}>
             다시 도전
           </button>
@@ -188,6 +190,8 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
             레벨 선택
           </button>
         </div>
+
+        <div style={{ marginTop: 20 }}><AdBanner /></div>
       </div>
     )
   }

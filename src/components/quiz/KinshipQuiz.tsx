@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useFamily } from '../../state/FamilyContext';
 import { BackBar } from '../play/PlayHub';
+import { AdBanner } from '../ads/AdBanner';
+import { maybeFireGameOverAd } from '../ads/GameAd';
 
 interface QuizQuestion {
   personId: string;
@@ -150,7 +152,7 @@ export function KinshipQuiz({ onBack }: KinshipQuizProps = {}) {
           <div style={{ marginTop: 8, fontSize: 13, color: textSecondary }}>
             {pct >= 90 ? '완벽해요! 족보 박사 인정!' : pct >= 70 ? '잘 하셨어요!' : pct >= 50 ? '조금 더 연습해봐요.' : '호칭이 헷갈리시나요? 가계도를 다시 살펴보세요.'}
           </div>
-          <button onClick={startQuiz} style={{ ...startBtnStyle, marginTop: 28 }}>
+          <button onClick={() => { maybeFireGameOverAd('호칭 퀴즈'); startQuiz(); }} style={{ ...startBtnStyle, marginTop: 28 }}>
             다시 하기
           </button>
           <button onClick={() => setPhase('idle')} style={{
@@ -159,6 +161,7 @@ export function KinshipQuiz({ onBack }: KinshipQuizProps = {}) {
           }}>
             처음으로
           </button>
+          <div style={{ marginTop: 20 }}><AdBanner /></div>
         </div>
       </>
     );
