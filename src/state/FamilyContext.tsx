@@ -17,7 +17,7 @@ export interface FamilyState {
   selectedPersonId: string | null;
   darkMode: boolean;
   relationships: Map<string, RelationshipResult>;
-  activeTab: 'tree' | 'settings' | 'search' | 'quiz';
+  activeTab: 'tree' | 'settings' | 'search' | 'play';
   showAddForm: boolean;
   editingPersonId: string | null;
   undoStack: FamilyGraph[];
@@ -33,7 +33,7 @@ type FamilyAction =
   | { type: 'SELECT_PERSON'; personId: string | null }
   | { type: 'IMPORT_GRAPH'; graph: FamilyGraph }
   | { type: 'SET_DARK_MODE'; darkMode: boolean }
-  | { type: 'SET_TAB'; tab: 'tree' | 'settings' | 'search' | 'quiz' }
+  | { type: 'SET_TAB'; tab: 'tree' | 'settings' | 'search' | 'play' }
   | { type: 'SHOW_ADD_FORM'; show: boolean }
   | { type: 'SET_EDITING'; personId: string | null }
   | { type: 'UNDO' }

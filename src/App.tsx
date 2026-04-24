@@ -5,7 +5,7 @@ import { PersonForm } from './components/forms/PersonForm';
 import { EditForm } from './components/forms/EditForm';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { RelationshipSearch } from './components/search/RelationshipSearch';
-import { KinshipQuiz } from './components/quiz/KinshipQuiz';
+import { PlayHub } from './components/play/PlayHub';
 import { TEMPLATES } from './storage/templates';
 import { AdBanner } from './components/ads/AdBanner';
 import { InterstitialAd, useInterstitialAd } from './components/ads/InterstitialAd';
@@ -322,8 +322,8 @@ export default function App() {
           </>
         ) : activeTab === 'search' ? (
           <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><RelationshipSearch /></div>
-        ) : activeTab === 'quiz' ? (
-          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><KinshipQuiz /></div>
+        ) : activeTab === 'play' ? (
+          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><PlayHub /></div>
         ) : (
           <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><SettingsPage /></div>
         )}
@@ -334,7 +334,7 @@ export default function App() {
         {([
           { tab: 'tree' as const, icon: '\u{1F333}', label: '가계도' },
           { tab: 'search' as const, icon: '\u{1F50D}', label: '관계검색' },
-          { tab: 'quiz' as const, icon: '\u{1F3AF}', label: '호칭퀴즈' },
+          { tab: 'play' as const, icon: '\u{1F3AE}', label: '놀이' },
           { tab: 'settings' as const, icon: '\u2699', label: '설정' },
         ]).map(t => (
           <button key={t.tab} onClick={() => dispatch({ type: 'SET_TAB', tab: t.tab })}

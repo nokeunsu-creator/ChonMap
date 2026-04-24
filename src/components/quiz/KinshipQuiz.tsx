@@ -1,11 +1,16 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useFamily } from '../../state/FamilyContext';
+import { BackBar } from '../play/PlayHub';
 
 interface QuizQuestion {
   personId: string;
   personName: string;
   correctTitle: string;
   options: string[];
+}
+
+interface KinshipQuizProps {
+  onBack?: () => void;
 }
 
 const TITLE_POOL = [
@@ -16,7 +21,7 @@ const TITLE_POOL = [
   '형수', '제수', '올케', '매형', '매제',
 ];
 
-export function KinshipQuiz() {
+export function KinshipQuiz({ onBack }: KinshipQuizProps = {}) {
   const { state } = useFamily();
   const { relationships, graph, perspectivePersonId, darkMode: dark } = state;
 
@@ -94,30 +99,38 @@ export function KinshipQuiz() {
     padding: '14px 32px', fontSize: 16, fontWeight: 700, cursor: 'pointer',
   };
 
+  const backHeader = onBack ? <BackBar title="호칭 퀴즈" onBack={onBack} dark={dark} /> : null;
+
   if (personCount < 3) {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <div style={{ fontSize: 40 }}>🎯</div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: textPrimary, marginTop: 8 }}>호칭 퀴즈</div>
-        <div style={{ fontSize: 13, color: textSecondary, marginTop: 8, lineHeight: 1.6 }}>
-          퀴즈를 시작하려면<br />가족을 3명 이상 추가하세요.
+      <>
+        {backHeader}
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 40 }}>🎯</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: textPrimary, marginTop: 8 }}>호칭 퀴즈</div>
+          <div style={{ fontSize: 13, color: textSecondary, marginTop: 8, lineHeight: 1.6 }}>
+            퀴즈를 시작하려면<br />가족을 3명 이상 추가하세요.
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (phase === 'idle') {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <div style={{ fontSize: 48 }}>🎯</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: textPrimary, marginTop: 8 }}>호칭 퀴즈</div>
-        <div style={{ fontSize: 13, color: textSecondary, marginTop: 10, lineHeight: 1.7 }}>
-          가계도 속 가족의 호칭을<br />맞춰보세요!
+      <>
+        {backHeader}
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 48 }}>🎯</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: textPrimary, marginTop: 8 }}>호칭 퀴즈</div>
+          <div style={{ fontSize: 13, color: textSecondary, marginTop: 10, lineHeight: 1.7 }}>
+            가계도 속 가족의 호칭을<br />맞춰보세요!
+          </div>
+          <button onClick={startQuiz} style={{ ...startBtnStyle, marginTop: 28 }}>
+            시작하기
+          </button>
         </div>
-        <button onClick={startQuiz} style={{ ...startBtnStyle, marginTop: 28 }}>
-          시작하기
-        </button>
-      </div>
+      </>
     );
   }
 
@@ -125,26 +138,29 @@ export function KinshipQuiz() {
     const pct = Math.round((score / questions.length) * 100);
     const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '😊' : '📚';
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <div style={{ fontSize: 56 }}>{emoji}</div>
-        <div style={{ fontSize: 20, fontWeight: 800, color: textPrimary, marginTop: 8 }}>퀴즈 완료!</div>
-        <div style={{ fontSize: 48, fontWeight: 800, color: goldColor, marginTop: 16 }}>
-          {score} / {questions.length}
+      <>
+        {backHeader}
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 56 }}>{emoji}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: textPrimary, marginTop: 8 }}>퀴즈 완료!</div>
+          <div style={{ fontSize: 48, fontWeight: 800, color: goldColor, marginTop: 16 }}>
+            {score} / {questions.length}
+          </div>
+          <div style={{ fontSize: 14, color: textSecondary, marginTop: 4 }}>정답률 {pct}%</div>
+          <div style={{ marginTop: 8, fontSize: 13, color: textSecondary }}>
+            {pct >= 90 ? '완벽해요! 족보 박사 인정!' : pct >= 70 ? '잘 하셨어요!' : pct >= 50 ? '조금 더 연습해봐요.' : '호칭이 헷갈리시나요? 가계도를 다시 살펴보세요.'}
+          </div>
+          <button onClick={startQuiz} style={{ ...startBtnStyle, marginTop: 28 }}>
+            다시 하기
+          </button>
+          <button onClick={() => setPhase('idle')} style={{
+            marginTop: 10, background: 'none', border: `1px solid ${cardBorder}`,
+            borderRadius: 14, padding: '12px 28px', fontSize: 14, color: textSecondary, cursor: 'pointer', display: 'block', width: '100%',
+          }}>
+            처음으로
+          </button>
         </div>
-        <div style={{ fontSize: 14, color: textSecondary, marginTop: 4 }}>정답률 {pct}%</div>
-        <div style={{ marginTop: 8, fontSize: 13, color: textSecondary }}>
-          {pct >= 90 ? '완벽해요! 족보 박사 인정!' : pct >= 70 ? '잘 하셨어요!' : pct >= 50 ? '조금 더 연습해봐요.' : '호칭이 헷갈리시나요? 가계도를 다시 살펴보세요.'}
-        </div>
-        <button onClick={startQuiz} style={{ ...startBtnStyle, marginTop: 28 }}>
-          다시 하기
-        </button>
-        <button onClick={() => setPhase('idle')} style={{
-          marginTop: 10, background: 'none', border: `1px solid ${cardBorder}`,
-          borderRadius: 14, padding: '12px 28px', fontSize: 14, color: textSecondary, cursor: 'pointer', display: 'block', width: '100%',
-        }}>
-          처음으로
-        </button>
-      </div>
+      </>
     );
   }
 
@@ -152,6 +168,8 @@ export function KinshipQuiz() {
   const perspPerson = graph.persons[perspectivePersonId];
 
   return (
+    <>
+    {backHeader}
     <div style={{ padding: 16, maxWidth: 420, margin: '0 auto' }}>
       {/* 진행 상황 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -230,5 +248,6 @@ export function KinshipQuiz() {
         </button>
       )}
     </div>
+    </>
   );
 }
