@@ -194,7 +194,7 @@ export default function WordMatching({ onBack }) {
                   background: colors[i], color: '#FFF', textAlign: 'left',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
-                <span style={{ fontSize: 16, fontWeight: 700 }}>{g}학년</span>
+                <span style={{ fontSize: 16, fontWeight: 700 }}>레벨 {g}</span>
                 <span style={{ fontSize: 12, opacity: 0.85 }}>{WORD_PAIRS[g].length}개 단어 풀</span>
               </button>
             )
@@ -267,7 +267,7 @@ export default function WordMatching({ onBack }) {
           style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#555' }}>
           ←
         </button>
-        <h2 style={{ fontSize: 18, fontWeight: 700, flex: 1 }}>🔤 {grade}학년 매칭</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, flex: 1 }}>🔤 레벨 {grade} 매칭</h2>
         <div style={{ fontSize: 12, color: '#666' }}>
           ⏱ {formatTime(elapsed)} · ❌ {mistakes}
         </div>

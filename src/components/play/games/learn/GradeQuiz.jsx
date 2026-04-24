@@ -138,7 +138,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
           ))}
         </div>
         <p style={{ fontSize: 11, color: '#BBB', marginTop: 20 }}>
-          선택한 이름으로 점수가 월별 순위에 기록돼요 🏅
+          기록은 이 기기에만 저장돼요
         </p>
       </div>
     )
@@ -161,7 +161,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
         </div>
         <div style={{ fontSize: 56, marginBottom: 12 }}>{icon}</div>
         <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{title}</h2>
-        <p style={{ fontSize: 13, color: '#888', marginBottom: 24 }}>{gradeCaption || '학년을 선택하세요'}</p>
+        <p style={{ fontSize: 13, color: '#888', marginBottom: 24 }}>{gradeCaption || '레벨을 선택하세요'}</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 300, margin: '0 auto' }}>
           {gradeKeys.map((g, i) => {
@@ -181,7 +181,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>{gradeLabels?.[g] || `${g}학년`}</div>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>{gradeLabels?.[g] || `레벨 ${g}`}</div>
                   <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>{gData.questions.length}문제</div>
                 </div>
                 {best != null && (
@@ -211,7 +211,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
           border: '2px solid #F1C40F', marginBottom: 20,
         }}>
           <div style={{ fontSize: 52, marginBottom: 8 }}>{emoji}</div>
-          <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{gradeLabels?.[grade] || `${grade}학년`} 완료!</div>
+          <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{gradeLabels?.[grade] || `레벨 ${grade}`} 완료!</div>
           <div style={{ fontSize: 36, fontWeight: 700, color, marginBottom: 4 }}>{score} / {questions.length}</div>
         </div>
 
@@ -239,7 +239,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
           </button>
           <button onClick={() => { setPhase('grades'); setGrade(null) }}
             style={{ flex: 1, padding: '14px 0', borderRadius: 12, border: 'none', cursor: 'pointer', background: '#F0F0F0', color: '#555', fontSize: 15, fontWeight: 700 }}>
-            학년 선택
+            레벨 선택
           </button>
         </div>
       </div>
@@ -259,7 +259,7 @@ export default function GradeQuiz({ quizId, title, icon, color, grades, onBack, 
             style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#FFF', fontSize: 14, borderRadius: 20, padding: '4px 12px', cursor: 'pointer' }}>
             ← 나가기
           </button>
-          <span style={{ fontSize: 13 }}>{gradeLabels?.[grade] || `${grade}학년`} · {qIndex + 1}/{questions.length} · ✅ {score}</span>
+          <span style={{ fontSize: 13 }}>{gradeLabels?.[grade] || `레벨 ${grade}`} · {qIndex + 1}/{questions.length} · ✅ {score}</span>
         </div>
         <div style={{ fontSize: 18, fontWeight: 700 }}>{icon} {title}</div>
       </div>

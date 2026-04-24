@@ -43,7 +43,7 @@ const CATEGORY_INFO: Record<Category, { icon: string; label: string }> = {
   family:   { icon: '🎯', label: '우리 가족' },
   casual:   { icon: '🎮', label: '미니게임' },
   strategy: { icon: '♟',  label: '전략' },
-  learn:    { icon: '📚', label: '학습' },
+  learn:    { icon: '🧠', label: '두뇌·상식' },
 };
 
 const GAMES: GameMeta[] = [
@@ -61,31 +61,31 @@ const GAMES: GameMeta[] = [
   { id: 'janggi', category: 'strategy', icon: '\u{265F}', title: '장기', desc: '한국 전통', tag: '전략' },
   { id: 'chess',  category: 'strategy', icon: '\u{2654}', title: '체스', desc: '체크메이트!', tag: '전략' },
 
-  // 학습 — 바둑 교실 (앞쪽)
-  { id: 'baduk-classroom', category: 'learn', icon: '♟', title: '바둑 교실', desc: '58개 레슨 퍼즐', tag: '바둑' },
+  // 두뇌·상식 — 바둑 교실 (앞쪽)
+  { id: 'baduk-classroom', category: 'learn', icon: '♟', title: '바둑 교실', desc: '58단계 레슨 퍼즐', tag: '바둑' },
 
-  // 학습 — GradeQuiz 기반
-  { id: 'proverb',    category: 'learn', icon: '📜', title: '사자성어/속담', desc: '사자성어/속담', tag: '국어' },
-  { id: 'spelling',   category: 'learn', icon: '✏️', title: '맞춤법',       desc: '올바른 표기', tag: '국어' },
-  { id: 'flag',       category: 'learn', icon: '🌍', title: '세계 국기',    desc: '국기/수도', tag: '사회' },
-  { id: 'continent',  category: 'learn', icon: '🗺️', title: '지도 찾기',    desc: '대륙/나라', tag: '사회' },
-  { id: 'dinosaur',   category: 'learn', icon: '🦖', title: '공룡 퀴즈',    desc: '공룡 종', tag: '과학' },
-  { id: 'space',      category: 'learn', icon: '🌌', title: '우주 퀴즈',    desc: '태양계/별자리', tag: '과학' },
-  { id: 'hanja',      category: 'learn', icon: '漢', title: '한자',         desc: '한자 읽기', tag: '한자' },
-  { id: 'logic',      category: 'learn', icon: '🧩', title: '코딩/논리',    desc: '논리 사고', tag: '논리' },
-  { id: 'safety',     category: 'learn', icon: '🛡️', title: '안전/생활',    desc: '생활 상식', tag: '상식' },
+  // 두뇌·상식 — 6단계 난이도 퀴즈
+  { id: 'proverb',    category: 'learn', icon: '📜', title: '사자성어·속담', desc: '6단계 난이도',  tag: '국어' },
+  { id: 'spelling',   category: 'learn', icon: '✏️', title: '맞춤법',        desc: '6단계 난이도',  tag: '국어' },
+  { id: 'flag',       category: 'learn', icon: '🌍', title: '세계 국기',     desc: '국기/수도',     tag: '상식' },
+  { id: 'continent',  category: 'learn', icon: '🗺️', title: '지도 찾기',     desc: '대륙·나라',     tag: '상식' },
+  { id: 'dinosaur',   category: 'learn', icon: '🦖', title: '공룡 퀴즈',     desc: '공룡 종',       tag: '상식' },
+  { id: 'space',      category: 'learn', icon: '🌌', title: '우주 퀴즈',     desc: '태양계·별자리', tag: '상식' },
+  { id: 'hanja',      category: 'learn', icon: '漢', title: '한자',          desc: '6단계 난이도',  tag: '한자' },
+  { id: 'logic',      category: 'learn', icon: '🧩', title: '논리 퍼즐',     desc: '사고력 훈련',   tag: '두뇌' },
+  { id: 'safety',     category: 'learn', icon: '🛡️', title: '생활 상식',     desc: '안전/상식',     tag: '상식' },
 
-  // 학습 — 독립 게임
-  { id: 'english-championship',category: 'learn', icon: '🇺🇸', title: '영어 챔피언',   desc: '단어/문장 종합',   tag: '영어' },
-  { id: 'history',             category: 'learn', icon: '🏯', title: '한국사 퀴즈',   desc: '10주제 200문',    tag: '사회' },
-  { id: 'science',             category: 'learn', icon: '🔬', title: '과학 퀴즈',     desc: '10주제 200문',    tag: '과학' },
-  { id: 'nonsense',            category: 'learn', icon: '🤔', title: '넌센스 퀴즈',   desc: '125문 넌센스',    tag: '두뇌' },
+  // 두뇌·상식 — 독립 게임
+  { id: 'english-championship',category: 'learn', icon: '🇺🇸', title: '영어 챔피언',   desc: '단어·문장 종합',   tag: '영어' },
+  { id: 'history',             category: 'learn', icon: '🏯', title: '한국사 퀴즈',   desc: '10주제 200문',    tag: '상식' },
+  { id: 'science',             category: 'learn', icon: '🔬', title: '과학 퀴즈',     desc: '10주제 200문',    tag: '상식' },
+  { id: 'nonsense',            category: 'learn', icon: '🤔', title: '넌센스 퀴즈',   desc: '125문 두뇌게임',   tag: '두뇌' },
   { id: 'word-matching',       category: 'learn', icon: '🔗', title: '영단어 매칭',   desc: '영↔한 짝맞추기',   tag: '영어' },
   { id: 'math-speed',          category: 'learn', icon: '🔢', title: '연산 스피드',   desc: '사칙연산 타임',    tag: '수학' },
   { id: 'shape',               category: 'learn', icon: '📐', title: '도형 퀴즈',     desc: '도형 알아맞히기',  tag: '수학' },
   { id: 'math-champ',          category: 'learn', icon: '🏆', title: '수학 챔피언',   desc: '종합 도전',        tag: '수학' },
   { id: 'word-battle',         category: 'learn', icon: '⚔️', title: '단어 배틀',     desc: '2인 영단어',       tag: '영어' },
-  { id: 'word-sprint',         category: 'learn', icon: '💨', title: '단어 스프린트', desc: '영단어 빠른 입력', tag: '영어' },
+  { id: 'word-sprint',         category: 'learn', icon: '💨', title: '단어 스프린트', desc: '영단어 속도',      tag: '영어' },
 ];
 
 const CATEGORY_ORDER: Category[] = ['family', 'casual', 'strategy', 'learn'];
