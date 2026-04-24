@@ -12,17 +12,9 @@ export function FamilyTreeSVG({ searchQuery }: FamilyTreeSVGProps) {
   const { state, dispatch } = useFamily();
   const { graph, perspectivePersonId, selectedPersonId, relationships, photos, darkMode } = state;
 
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const showLineageColors = false; // 계통 색상 기능 제거
-  const toggleCollapse = useCallback((personId: string) => {
-    setCollapsedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(personId)) next.delete(personId); else next.add(personId);
-      return next;
-    });
-  }, []);
 
-  const layout = useMemo(() => computeLayout(graph, collapsedIds), [graph, collapsedIds]);
+  const layout = useMemo(() => computeLayout(graph), [graph]);
   const { positions, generationYs, minGeneration, maxGeneration } = layout;
 
   const [horizontal, setHorizontal] = useState(() => localStorage.getItem('chonmap_horizontal') === 'true');
@@ -326,7 +318,6 @@ export function FamilyTreeSVG({ searchQuery }: FamilyTreeSVGProps) {
           const isDragging = draggingId === person.id;
           const nodeX = isDragging ? (horizontal ? pos.x : dragPos) : pos.x;
           const nodeY = isDragging ? (horizontal ? dragPos : pos.y) : pos.y;
-          const hasChildren = graph.edges.some(e => e.type === 'PARENT_OF' && e.from === person.id);
           return (
             <PersonNode
               key={person.id}
@@ -342,11 +333,8 @@ export function FamilyTreeSVG({ searchQuery }: FamilyTreeSVGProps) {
               horizontal={horizontal}
               isDragging={isDragging}
               showLineageColors={showLineageColors}
-              hasChildren={hasChildren}
-              isCollapsed={collapsedIds.has(person.id)}
               onClick={() => handleNodeClick(person.id)}
               onLongPress={(pid) => handleNodeLongPress(person.id, pid)}
-              onCollapseToggle={() => toggleCollapse(person.id)}
             />
           );
         })}

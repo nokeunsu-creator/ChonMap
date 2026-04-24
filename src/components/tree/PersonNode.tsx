@@ -18,11 +18,8 @@ interface PersonNodeProps {
   horizontal?: boolean;
   isDragging?: boolean;
   showLineageColors?: boolean;
-  hasChildren?: boolean;
-  isCollapsed?: boolean;
   onClick: () => void;
   onLongPress: (pointerId: number) => void;
-  onCollapseToggle?: () => void;
 }
 
 function getEmoji(person: Person): string {
@@ -45,7 +42,7 @@ function formatTitle(rel: RelationshipResult | undefined): string {
 export const PersonNode = React.memo(function PersonNode({
   person, x, y, relationship, isPerspective, isSelected, isOnPath,
   isSearchMatch, photoUrl, horizontal, isDragging, showLineageColors,
-  hasChildren, isCollapsed, onClick, onLongPress, onCollapseToggle,
+  onClick, onLongPress,
 }: PersonNodeProps) {
   const title = formatTitle(relationship);
   const emoji = getEmoji(person);
@@ -219,21 +216,6 @@ export const PersonNode = React.memo(function PersonNode({
         </g>
       )}
 
-      {/* 브랜치 접기/펼치기 버튼 */}
-      {hasChildren && onCollapseToggle && (
-        <g onClick={e => { e.stopPropagation(); onCollapseToggle(); }} style={{ cursor: 'pointer' }}>
-          <circle cx={x} cy={horizontal ? y + 28 : y + 28} r={8}
-            fill={isCollapsed ? '#F59E0B' : '#E5E7EB'} stroke="#D1D5DB" strokeWidth={1} />
-          <text x={x} y={y + 32} textAnchor="middle" fontSize={9} fontWeight={700}
-            fill={isCollapsed ? 'white' : '#6B7280'} style={{ pointerEvents: 'none' }}>
-            {isCollapsed ? '▶' : '▼'}
-          </text>
-          {isCollapsed && (
-            <text x={x + 16} y={y + 34} textAnchor="start" fontSize={8} fill="#9CA3AF"
-              style={{ pointerEvents: 'none' }}>접힘</text>
-          )}
-        </g>
-      )}
     </g>
   );
 });
