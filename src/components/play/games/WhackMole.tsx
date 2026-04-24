@@ -160,7 +160,11 @@ export function WhackMole({ onBack }: GameProps) {
   const textSecondary = dark ? '#9CA3AF' : '#A09080';
   const cardBg = dark ? '#1F2937' : 'white';
   const cardBorder = dark ? '#374151' : '#E8DCC8';
-  const holeBg = dark ? '#111827' : '#8B7355';
+  // 잔디 느낌 그라데이션 (두더지 갈색과 선명한 대비)
+  const holeBg = dark
+    ? 'radial-gradient(circle at 50% 35%, #0F172A 0%, #1E293B 100%)'
+    : 'radial-gradient(circle at 50% 35%, #166534 0%, #22C55E 100%)';
+  const holeBorder = dark ? '#1E293B' : '#14532D';
 
   const startBtn: React.CSSProperties = {
     background: 'linear-gradient(135deg, #8B6914, #C4961A)',
@@ -221,13 +225,13 @@ export function WhackMole({ onBack }: GameProps) {
                   style={{
                     aspectRatio: '1 / 1',
                     background: holeBg,
-                    border: `3px solid ${dark ? '#374151' : '#6B5845'}`,
+                    border: `3px solid ${holeBorder}`,
                     borderRadius: '50%',
                     fontSize: 44,
                     cursor: phase === 'playing' ? 'pointer' : 'default',
                     position: 'relative',
                     overflow: 'hidden',
-                    boxShadow: 'inset 0 -6px 12px rgba(0,0,0,0.3)',
+                    boxShadow: 'inset 0 -8px 16px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.15)',
                     transition: 'transform 0.08s',
                     transform: hit === i ? 'scale(0.9)' : 'scale(1)',
                   }}
@@ -245,8 +249,9 @@ export function WhackMole({ onBack }: GameProps) {
                       transform: up ? 'translateY(0)' : 'translateY(60%)',
                       opacity: up ? 1 : 0,
                       transition: 'transform 0.15s, opacity 0.1s',
+                      filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.4))',
                     }}>
-                      🦫
+                      🐹
                     </span>
                   )}
                 </button>

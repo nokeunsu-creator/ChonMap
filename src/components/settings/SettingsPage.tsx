@@ -38,6 +38,17 @@ export function SettingsPage() {
     fireInterstitialAd('데이터를 내보냈어요!');
   };
 
+  // HTML 이스케이프 — 사용자 입력이 document.write로 주입되므로 필수 (V-01 방어)
+  const escapeHtml = (s: unknown): string => {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   const handleExportPDF = () => {
     const perspPerson = state.graph.persons[state.perspectivePersonId];
     const persons = Object.values(state.graph.persons);
@@ -47,13 +58,13 @@ export function SettingsPage() {
       const title = isRoot ? '기준 인물 (나)' : (rel?.title || '-');
       const chon = isRoot ? '-' : rel ? (rel.chon === -1 ? '배우자' : `${rel.chon}촌`) : '-';
       return `<tr>
-        <td>${p.name}</td>
+        <td>${escapeHtml(p.name)}</td>
         <td>${p.gender === 'M' ? '남' : '여'}</td>
-        <td>${title}</td>
-        <td>${chon}</td>
-        <td>${p.birthYear || '-'}</td>
-        <td>${p.deathYear ? `${p.deathYear} †` : '-'}</td>
-        <td>${p.memo || '-'}</td>
+        <td>${escapeHtml(title)}</td>
+        <td>${escapeHtml(chon)}</td>
+        <td>${escapeHtml(p.birthYear || '-')}</td>
+        <td>${p.deathYear ? `${escapeHtml(p.deathYear)} †` : '-'}</td>
+        <td>${escapeHtml(p.memo || '-')}</td>
       </tr>`;
     }).join('');
 
@@ -76,7 +87,7 @@ export function SettingsPage() {
 </head>
 <body>
   <h1>&#127795; 촌맵 족보</h1>
-  <div class="subtitle">기준 인물: ${perspPerson?.name || '나'} &nbsp;·&nbsp; 생성일: ${new Date().toLocaleDateString('ko-KR')} &nbsp;·&nbsp; 총 ${persons.length}명</div>
+  <div class="subtitle">기준 인물: ${escapeHtml(perspPerson?.name || '나')} &nbsp;·&nbsp; 생성일: ${new Date().toLocaleDateString('ko-KR')} &nbsp;·&nbsp; 총 ${persons.length}명</div>
   <table>
     <thead><tr><th>이름</th><th>성별</th><th>호칭</th><th>촌수</th><th>출생연도</th><th>사망연도</th><th>메모</th></tr></thead>
     <tbody>${rows}</tbody>

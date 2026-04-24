@@ -32,6 +32,30 @@ export function validateGraph(graph: FamilyGraph): boolean {
     if (typeof person.id !== 'string' || typeof person.name !== 'string') return false;
     if (person.gender !== 'M' && person.gender !== 'F') return false;
     if (person.name.length > 100) return false;
+
+    // memo: 문자열·200자 제한 (V-03)
+    if (person.memo !== undefined) {
+      if (typeof person.memo !== 'string') return false;
+      if (person.memo.length > 500) return false; // UI는 200, import은 넉넉히 500 허용
+    }
+    // birthYear/deathYear: 숫자·범위 검증 (V-03)
+    if (person.birthYear !== undefined) {
+      if (typeof person.birthYear !== 'number' || !Number.isFinite(person.birthYear)) return false;
+      if (person.birthYear < 1 || person.birthYear > 9999) return false;
+    }
+    if (person.deathYear !== undefined) {
+      if (typeof person.deathYear !== 'number' || !Number.isFinite(person.deathYear)) return false;
+      if (person.deathYear < 1 || person.deathYear > 9999) return false;
+    }
+    // MM-DD 형식만 허용
+    if (person.birthMonthDay !== undefined) {
+      if (typeof person.birthMonthDay !== 'string') return false;
+      if (person.birthMonthDay && !/^\d{2}-\d{2}$/.test(person.birthMonthDay)) return false;
+    }
+    if (person.deathMonthDay !== undefined) {
+      if (typeof person.deathMonthDay !== 'string') return false;
+      if (person.deathMonthDay && !/^\d{2}-\d{2}$/.test(person.deathMonthDay)) return false;
+    }
   }
 
   return true;
