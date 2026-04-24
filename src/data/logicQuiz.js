@@ -1,4 +1,32 @@
 const logicQuiz = {
+  1: {
+    questions: [
+      { q: '사과, 바나나, 딸기 중 노란색은?', choices: ['사과', '바나나', '딸기', '없음'], answer: 1, explanation: '바나나가 노란색이에요.' },
+      { q: '강아지가 내는 소리는?', choices: ['멍멍', '야옹', '음매', '꿀꿀'], answer: 0, explanation: '강아지는 "멍멍" 짖어요.' },
+      { q: '1 + 2 = ?', choices: ['2', '3', '4', '5'], answer: 1, explanation: '1과 2를 더하면 3이에요.' },
+      { q: '5에서 2를 빼면?', choices: ['2', '3', '4', '7'], answer: 1, explanation: '5 − 2 = 3이에요.' },
+      { q: '짝을 찾아요. 해 – 낮, 달 – ?', choices: ['밤', '아침', '저녁', '구름'], answer: 0, explanation: '달은 밤에 나타나요.' },
+      { q: '다음 중 동물이 아닌 것은?', choices: ['사자', '호랑이', '책상', '코끼리'], answer: 2, explanation: '책상은 동물이 아니에요.' },
+      { q: '다음 순서로 맞는 것은? 1, 2, 3, __?', choices: ['4', '5', '0', '10'], answer: 0, explanation: '1, 2, 3 다음은 4예요.' },
+      { q: '빨간색 + 파란색 = ?', choices: ['초록', '보라', '노랑', '검정'], answer: 1, explanation: '빨강과 파랑을 섞으면 보라색이 돼요.' },
+      { q: '다음 중 둥근 것은?', choices: ['책', '공', '상자', '연필'], answer: 1, explanation: '공은 둥글어요.' },
+      { q: '눈이 오면 계절은?', choices: ['봄', '여름', '가을', '겨울'], answer: 3, explanation: '눈이 오는 계절은 겨울이에요.' },
+    ]
+  },
+  2: {
+    questions: [
+      { q: '규칙 찾기: 2, 4, 6, 8, __?', choices: ['9', '10', '11', '12'], answer: 1, explanation: '2씩 커져요. 8 다음은 10이에요.' },
+      { q: '같은 것끼리 짝지어요. 사과 – 과일, 호랑이 – ?', choices: ['꽃', '동물', '옷', '음식'], answer: 1, explanation: '호랑이는 동물이에요.' },
+      { q: '3 + 4 = ?', choices: ['6', '7', '8', '9'], answer: 1, explanation: '3과 4를 더하면 7이에요.' },
+      { q: '다음 중 다른 하나는?', choices: ['고양이', '강아지', '자동차', '토끼'], answer: 2, explanation: '자동차만 동물이 아니에요.' },
+      { q: '컴퓨터를 사용할 때 쓰는 것은?', choices: ['연필', '지우개', '마우스', '자'], answer: 2, explanation: '마우스는 컴퓨터 장치예요.' },
+      { q: '10에서 4를 빼면?', choices: ['4', '5', '6', '7'], answer: 2, explanation: '10 − 4 = 6이에요.' },
+      { q: '규칙 찾기: 1, 3, 5, 7, __?', choices: ['8', '9', '10', '11'], answer: 1, explanation: '2씩 커지는 홀수예요. 7 다음은 9예요.' },
+      { q: '로봇이 "앞으로 3번 간다"고 하면 몇 걸음?', choices: ['1', '2', '3', '4'], answer: 2, explanation: '3번이니까 3걸음이에요.' },
+      { q: '참이면 ○, 거짓이면 ×. "개는 다리가 네 개다."', choices: ['○', '×', '모름', '둘 다'], answer: 0, explanation: '개는 다리가 네 개예요.' },
+      { q: '다음 중 가장 큰 수는?', choices: ['15', '27', '9', '21'], answer: 1, explanation: '27이 가장 큰 수예요.' },
+    ]
+  },
   3: {
     questions: [
       {

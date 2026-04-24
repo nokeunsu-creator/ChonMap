@@ -1,4 +1,32 @@
 const hanjaQuiz = {
+  1: {
+    questions: [
+      { q: '一의 뜻은?', choices: ['하나', '둘', '셋', '넷'], answer: 0, explanation: '一(일)은 하나를 뜻해요.' },
+      { q: '二의 뜻은?', choices: ['하나', '둘', '셋', '넷'], answer: 1, explanation: '二(이)는 둘을 뜻해요.' },
+      { q: '三의 뜻은?', choices: ['하나', '둘', '셋', '넷'], answer: 2, explanation: '三(삼)은 셋을 뜻해요.' },
+      { q: '人의 뜻은?', choices: ['사람', '나무', '물', '산'], answer: 0, explanation: '人(인)은 사람을 뜻해요.' },
+      { q: '口의 뜻은?', choices: ['눈', '귀', '입', '코'], answer: 2, explanation: '口(구)는 입을 뜻해요.' },
+      { q: '山의 뜻은?', choices: ['바다', '강', '산', '들'], answer: 2, explanation: '山(산)은 산을 뜻해요.' },
+      { q: '水의 뜻은?', choices: ['불', '물', '나무', '흙'], answer: 1, explanation: '水(수)는 물을 뜻해요.' },
+      { q: '火의 뜻은?', choices: ['물', '불', '나무', '바람'], answer: 1, explanation: '火(화)는 불을 뜻해요.' },
+      { q: '大의 뜻은?', choices: ['작다', '크다', '길다', '짧다'], answer: 1, explanation: '大(대)는 크다는 뜻이에요.' },
+      { q: '小의 뜻은?', choices: ['작다', '크다', '높다', '낮다'], answer: 0, explanation: '小(소)는 작다는 뜻이에요.' },
+    ]
+  },
+  2: {
+    questions: [
+      { q: '木의 뜻은?', choices: ['돌', '나무', '흙', '금'], answer: 1, explanation: '木(목)은 나무를 뜻해요.' },
+      { q: '金의 뜻은?', choices: ['은', '금/쇠', '돌', '흙'], answer: 1, explanation: '金(금)은 금이나 쇠를 뜻해요.' },
+      { q: '土의 뜻은?', choices: ['물', '불', '나무', '흙'], answer: 3, explanation: '土(토)는 흙을 뜻해요.' },
+      { q: '父의 뜻은?', choices: ['엄마', '아빠', '형', '언니'], answer: 1, explanation: '父(부)는 아버지를 뜻해요.' },
+      { q: '母의 뜻은?', choices: ['엄마', '아빠', '누나', '동생'], answer: 0, explanation: '母(모)는 어머니를 뜻해요.' },
+      { q: '日의 뜻은?', choices: ['달', '별', '해/날', '구름'], answer: 2, explanation: '日(일)은 해나 날을 뜻해요.' },
+      { q: '月의 뜻은?', choices: ['해', '달', '별', '하늘'], answer: 1, explanation: '月(월)은 달을 뜻해요.' },
+      { q: '年의 뜻은?', choices: ['달', '년/해', '하루', '주'], answer: 1, explanation: '年(년)은 해(연도)를 뜻해요.' },
+      { q: '上의 뜻은?', choices: ['아래', '위', '옆', '뒤'], answer: 1, explanation: '上(상)은 위를 뜻해요.' },
+      { q: '下의 뜻은?', choices: ['위', '옆', '앞', '아래'], answer: 3, explanation: '下(하)는 아래를 뜻해요.' },
+    ]
+  },
   3: {
     questions: [
       {
