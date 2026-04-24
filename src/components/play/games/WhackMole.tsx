@@ -9,7 +9,7 @@ const SPAWN_INTERVAL_MS = 700;
 const STORAGE_KEY = 'chonmap.game.whack';
 
 // 뽕망치 SVG — 알록달록한 장난감 망치
-function ToyHammer({ size = 48, rotation = 0, swinging = false }: { size?: number; rotation?: number; swinging?: boolean }) {
+export function ToyHammer({ size = 48, rotation = 0, swinging = false }: { size?: number; rotation?: number; swinging?: boolean }) {
   return (
     <svg
       width={size}

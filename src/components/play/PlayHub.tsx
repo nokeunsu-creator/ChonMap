@@ -4,7 +4,7 @@ import { useAndroidBack } from '../../utils/useAndroidBack';
 import { KinshipQuiz } from '../quiz/KinshipQuiz';
 import { TwentyFour } from './games/TwentyFour';
 import { MemoryGame } from './games/MemoryGame';
-import { WhackMole } from './games/WhackMole';
+import { WhackMole, ToyHammer } from './games/WhackMole';
 import { Omok } from './games/Omok';
 import { Baduk } from './games/Baduk';
 import { Janggi } from './games/Janggi';
@@ -14,7 +14,7 @@ type GameId = 'hub' | 'kinship' | 'twentyfour' | 'memory' | 'whack' | 'omok' | '
 
 interface GameMeta {
   id: GameId;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   desc: string;
   players: string;
@@ -25,7 +25,7 @@ const GAMES: GameMeta[] = [
   { id: 'kinship',    icon: '\u{1F3AF}', title: '호칭 퀴즈',    desc: '우리 가족의 호칭 맞추기',    players: '1인',   tag: '가족' },
   { id: 'twentyfour', icon: '\u{1F3B2}', title: '24점 퍼즐',    desc: '숫자 4개로 24를 만들기',      players: '1인~',  tag: '두뇌' },
   { id: 'memory',     icon: '\u{1F0CF}', title: '카드 뒤집기',   desc: '짝 맞추기 메모리 게임',        players: '1-2인', tag: '기억력' },
-  { id: 'whack',      icon: '\u{1F528}', title: '두더지 잡기',   desc: '30초 반사신경 게임',           players: '1인',   tag: '반사' },
+  { id: 'whack',      icon: <ToyHammer size={44} rotation={-20} />, title: '두더지 잡기',   desc: '30초 반사신경 게임',           players: '1인',   tag: '반사' },
   { id: 'omok',       icon: '\u{26AB}',  title: '오목',           desc: '5개 먼저 잇는 사람이 승리',    players: '1-2인', tag: '전략' },
   { id: 'baduk',      icon: '\u{26AA}',  title: '바둑',           desc: '집이 많은 쪽이 승리',          players: '1-2인', tag: '전략' },
   { id: 'janggi',     icon: '\u{265F}',  title: '장기',           desc: '한국 전통 보드게임',           players: '1-2인', tag: '전략' },
@@ -85,7 +85,7 @@ export function PlayHub() {
             onMouseUp={e => (e.currentTarget.style.transform = '')}
             onMouseLeave={e => (e.currentTarget.style.transform = '')}
           >
-            <div style={{ fontSize: 36, lineHeight: 1 }}>{g.icon}</div>
+            <div style={{ fontSize: 36, lineHeight: 1, display: 'flex', justifyContent: 'center', minHeight: 40 }}>{g.icon}</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: textPrimary, marginTop: 10 }}>{g.title}</div>
             <div style={{ fontSize: 11, color: textSecondary, marginTop: 4, minHeight: 28 }}>{g.desc}</div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 8 }}>
