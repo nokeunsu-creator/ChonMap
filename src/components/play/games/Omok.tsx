@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
+import { useAndroidBack } from '../../../utils/useAndroidBack';
 
 const SIZE = 15;
 type Stone = 'black' | 'white' | null;
@@ -287,6 +288,9 @@ export function Omok({ onBack }: GameProps) {
     aiThinkingRef.current = false;
     doReset();
   };
+
+  // 안드로이드 뒤로가기: 하위 화면 → 모드 선택
+  useAndroidBack(mode !== null, exitMode);
 
   const startAiGame = (playerPickedColor: Stone) => {
     const ai: Stone = playerPickedColor === 'black' ? 'white' : 'black';

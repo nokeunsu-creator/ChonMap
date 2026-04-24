@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
+import { useAndroidBack } from '../../../utils/useAndroidBack';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const ROWS = 10;
@@ -676,6 +677,13 @@ export function Janggi({ onBack }: GameProps) {
     setMode(null);
     doReset();
   };
+
+  // 안드로이드 뒤로가기: AI 레벨 선택 → 모드 선택 → (허브는 PlayHub이 처리)
+  const smartBack = () => {
+    if (mode === 'ai-level') { setMode('pick'); return; }
+    exitToHome();
+  };
+  useAndroidBack(mode !== null && mode !== 'pick', smartBack);
 
   // 테마
   const goldColor = dark ? '#FBBF24' : '#8B6914';

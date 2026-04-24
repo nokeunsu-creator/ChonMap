@@ -80,7 +80,7 @@ export default function App() {
   }, []);
 
   const dk = darkMode;
-  const bgGrad = dk ? '#111827' : 'linear-gradient(180deg, #FDF6E3 0%, #FAEBD7 100%)';
+  const bgGrad = dk ? '#111827' : 'linear-gradient(180deg, #FEF9EF 0%, #FFF5E1 40%, #FFF 100%)';
   const headerBg = dk ? 'linear-gradient(135deg, #92400E 0%, #B45309 50%, #D97706 100%)' : 'linear-gradient(135deg, #8B6914 0%, #C4961A 50%, #E8C547 100%)';
   const guideBg = dk ? 'rgba(55,65,81,0.8)' : 'rgba(255,248,220,0.8)';
   const guideColor = dk ? '#D1D5DB' : '#8B7355';

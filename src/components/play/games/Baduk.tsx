@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
+import { useAndroidBack } from '../../../utils/useAndroidBack';
 
 type Color = 'black' | 'white';
 type Cell = Color | null;
@@ -626,6 +627,17 @@ export function Baduk({ onBack }: GameProps) {
     setScore(null);
     setHistory([]);
   };
+
+  // 안드로이드 뒤로가기: 상단 화살표 로직과 동일하게 한 단계씩 위로
+  const smartBack = () => {
+    if (mode === 'ai' && size !== null && aiLevel !== null) { setAiLevel(null); return; }
+    if (mode === 'ai' && size !== null && aiLevel === null) { setSize(null); return; }
+    if (mode === 'ai' && size === null) { setMode(null); return; }
+    if (mode === 'local' && size !== null) { setSize(null); setBoard([]); setGameOver(false); setScore(null); setHistory([]); return; }
+    if (mode === 'local' && size === null) { setMode(null); return; }
+    setMode(null);
+  };
+  useAndroidBack(mode !== null, smartBack);
 
   // 테마 색
   const goldColor = dark ? '#FBBF24' : '#8B6914';

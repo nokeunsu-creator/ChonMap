@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useFamily } from '../../../state/FamilyContext';
 import { BackBar, GameProps } from '../PlayHub';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
+import { useAndroidBack } from '../../../utils/useAndroidBack';
 
 type PieceCode = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p';
 type Cell = PieceCode | null;
@@ -673,6 +674,9 @@ export function Chess({ onBack }: GameProps) {
     setMode(null);
     doReset();
   };
+
+  // 안드로이드 뒤로가기
+  useAndroidBack(mode !== null, exitToHome);
 
   // 테마
   const goldColor = dark ? '#FBBF24' : '#8B6914';

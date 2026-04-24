@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFamily } from '../../state/FamilyContext';
+import { useAndroidBack } from '../../utils/useAndroidBack';
 import { KinshipQuiz } from '../quiz/KinshipQuiz';
 import { WordChain } from './games/WordChain';
 import { TwentyFour } from './games/TwentyFour';
@@ -39,6 +40,9 @@ export function PlayHub() {
   const [current, setCurrent] = useState<GameId>('hub');
 
   const goBack = () => setCurrent('hub');
+
+  // 안드로이드 뒤로가기: 게임 화면 → 허브
+  useAndroidBack(current !== 'hub', goBack);
 
   if (current === 'kinship')    return <KinshipQuiz onBack={goBack} />;
   if (current === 'wordchain')  return <WordChain onBack={goBack} />;
