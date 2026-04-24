@@ -359,39 +359,6 @@ export default function MathSpeedQuiz({ onBack }) {
               <span style={{ fontSize: 12, fontWeight: 400, marginLeft: 8, opacity: 0.8 }}>{m.desc}</span>
             </button>
           ))}
-          <div style={{ borderTop: '1px solid #EEE', marginTop: 12, paddingTop: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#333', marginBottom: 12 }}>온라인 대전</div>
-            {MODES.map(m => (
-              <button key={'online-' + m.key} onClick={() => createOnline(m)}
-                style={{
-                  width: '100%', padding: '14px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
-                  fontSize: 15, fontWeight: 700, color: '#FFF', marginBottom: 8,
-                  background: `linear-gradient(135deg, ${m.color}, ${m.color}CC)`,
-                }}>
-                🌐 {m.label} 방 만들기
-              </button>
-            ))}
-            <div style={{ fontSize: 13, color: '#888', marginTop: 8 }}>또는 코드로 참가</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input
-                value={joinCode}
-                onChange={e => setJoinCode(e.target.value.replace(/[^0-9]/g, ''))}
-                maxLength={2}
-                placeholder="방 코드 2자리"
-                inputMode="numeric"
-                style={{
-                  flex: 1, padding: '12px', borderRadius: 10, border: '2px solid #DDD',
-                  fontSize: 16, fontWeight: 700, textAlign: 'center', letterSpacing: 4,
-                  fontFamily: 'monospace',
-                }}
-              />
-              <button onClick={joinOnline}
-                style={{ padding: '0 20px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#4895EF', color: '#FFF', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', minWidth: 52 }}>
-                참가
-              </button>
-            </div>
-            {room.error && <div style={{ color: '#E74C3C', fontSize: 13, marginTop: 8 }}>{room.error}</div>}
-          </div>
         </div>
       </div>
     )

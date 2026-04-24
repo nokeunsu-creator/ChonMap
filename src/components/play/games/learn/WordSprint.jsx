@@ -545,54 +545,6 @@ export default function WordSprint({ onBack }) {
           })}
         </div>
 
-        {/* 온라인 대전 */}
-        <div style={{ borderTop: '1px solid #EEE', paddingTop: 20, maxWidth: 340, margin: '0 auto' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#555', marginBottom: 12 }}>온라인 대전</div>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10,
-            marginBottom: 16,
-          }}>
-            {WORD_TOPICS.map(topic => (
-              <button key={'online-' + topic.key} onClick={() => createOnline(topic)}
-                style={{
-                  padding: '12px 8px', borderRadius: 14, border: 'none',
-                  cursor: 'pointer', background: 'linear-gradient(135deg, #4895EF, #4895EFCC)',
-                  textAlign: 'center', color: '#FFF',
-                }}
-                onPointerDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-                onPointerUp={e => e.currentTarget.style.transform = ''}
-                onPointerLeave={e => e.currentTarget.style.transform = ''}
-              >
-                <div style={{ fontSize: 20 }}>{topic.icon}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, marginTop: 2 }}>{topic.label}</div>
-              </button>
-            ))}
-          </div>
-
-          <div style={{ fontSize: 13, color: '#888', marginTop: 8 }}>또는 코드로 참가</div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <input
-              value={joinCode}
-              onChange={e => setJoinCode(e.target.value.replace(/[^0-9]/g, ''))}
-              maxLength={2}
-              placeholder="방 코드 2자리"
-              inputMode="numeric"
-              style={{
-                flex: 1, padding: '10px 12px', borderRadius: 10, border: '2px solid #E0E0E0',
-                fontSize: 16, textAlign: 'center', outline: 'none', fontFamily: 'monospace',
-              }}
-            />
-            <button onClick={joinOnline}
-              style={{
-                padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                background: '#4895EF', color: '#FFF', fontSize: 14, fontWeight: 700,
-                whiteSpace: 'nowrap', minWidth: 52,
-              }}>
-              참가
-            </button>
-          </div>
-          {room.error && <div style={{ color: '#EF476F', fontSize: 13, marginTop: 8 }}>{room.error}</div>}
-        </div>
       </div>
     )
   }

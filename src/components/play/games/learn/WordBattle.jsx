@@ -279,29 +279,6 @@ export default function WordBattle({ onBack }) {
         >
           🎯 혼자 하기 (타임어택)
         </button>
-        <button
-          onClick={() => setMode('create')}
-          style={{ ...styles.modeBtn, background: 'linear-gradient(135deg, #F72585, #B5179E)' }}
-        >
-          🌐 온라인 방 만들기
-        </button>
-        <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-          <input
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 2))}
-            maxLength={2}
-            inputMode="numeric"
-            placeholder="방 코드 2자리"
-            style={styles.codeInput}
-          />
-          <button
-            onClick={joinOnline}
-            style={{ ...styles.joinBtn, whiteSpace: 'nowrap', minWidth: 52 }}
-          >
-            참가
-          </button>
-        </div>
-        {room.error && <p style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{room.error}</p>}
       </div>
     )
   }
