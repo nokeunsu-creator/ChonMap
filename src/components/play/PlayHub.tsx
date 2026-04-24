@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useFamily } from '../../state/FamilyContext';
 import { useAndroidBack } from '../../utils/useAndroidBack';
 import { KinshipQuiz } from '../quiz/KinshipQuiz';
-import { WordChain } from './games/WordChain';
 import { TwentyFour } from './games/TwentyFour';
 import { MemoryGame } from './games/MemoryGame';
 import { WhackMole } from './games/WhackMole';
@@ -11,7 +10,7 @@ import { Baduk } from './games/Baduk';
 import { Janggi } from './games/Janggi';
 import { Chess } from './games/Chess';
 
-type GameId = 'hub' | 'kinship' | 'wordchain' | 'twentyfour' | 'memory' | 'whack' | 'omok' | 'baduk' | 'janggi' | 'chess';
+type GameId = 'hub' | 'kinship' | 'twentyfour' | 'memory' | 'whack' | 'omok' | 'baduk' | 'janggi' | 'chess';
 
 interface GameMeta {
   id: GameId;
@@ -24,7 +23,6 @@ interface GameMeta {
 
 const GAMES: GameMeta[] = [
   { id: 'kinship',    icon: '\u{1F3AF}', title: '호칭 퀴즈',    desc: '우리 가족의 호칭 맞추기',    players: '1인',   tag: '가족' },
-  { id: 'wordchain',  icon: '\u{1F517}', title: '끝말잇기',      desc: '번갈아 단어를 이어가요',      players: '2인',   tag: '언어' },
   { id: 'twentyfour', icon: '\u{1F3B2}', title: '24점 퍼즐',    desc: '숫자 4개로 24를 만들기',      players: '1인~',  tag: '두뇌' },
   { id: 'memory',     icon: '\u{1F0CF}', title: '카드 뒤집기',   desc: '짝 맞추기 메모리 게임',        players: '1-2인', tag: '기억력' },
   { id: 'whack',      icon: '\u{1F528}', title: '두더지 잡기',   desc: '30초 반사신경 게임',           players: '1인',   tag: '반사' },
@@ -45,7 +43,6 @@ export function PlayHub() {
   useAndroidBack(current !== 'hub', goBack);
 
   if (current === 'kinship')    return <KinshipQuiz onBack={goBack} />;
-  if (current === 'wordchain')  return <WordChain onBack={goBack} />;
   if (current === 'twentyfour') return <TwentyFour onBack={goBack} />;
   if (current === 'memory')     return <MemoryGame onBack={goBack} />;
   if (current === 'whack')      return <WhackMole onBack={goBack} />;
