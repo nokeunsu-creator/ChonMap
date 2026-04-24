@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useGameRoom } from '../../../../utils/pm/useGameRoom'
 import { unlock } from '../../../../utils/pm/stubs'
+
+// 온라인 모드 제거 — room은 더미 객체로 대체 (기존 코드 경로 안전 유지)
+function useGameRoom() {
+  return {
+    gameState: null, roomCode: '', myColor: null, role: null,
+    connected: false, error: null,
+    createRoom: async () => null, joinRoom: async () => false,
+    leaveRoom: () => {}, updateState: () => {}, setError: () => {},
+  };
+}
 
 function generateQuestion(level) {
   const ops = ['+', '-', '×', '÷']

@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { WORD_TOPICS } from '../../../../data/englishWords'
 import { getData, addScore, addDiamonds, updateRecord, updateDailyChallenge, addWrongWord } from '../../../../utils/pm/englishStorage'
-import { useGameRoom } from '../../../../utils/pm/useGameRoom'
+
+// 온라인 모드 제거 — 더미 room 객체
+function useGameRoom() {
+  return {
+    gameState: null, roomCode: '', myColor: null, role: null,
+    connected: false, error: null,
+    createRoom: async () => null, joinRoom: async () => false,
+    leaveRoom: () => {}, updateState: () => {}, setError: () => {},
+  };
+}
 
 function shuffle(arr) {
   const a = [...arr]

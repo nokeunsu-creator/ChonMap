@@ -13,16 +13,7 @@ export function FamilyTreeSVG({ searchQuery }: FamilyTreeSVGProps) {
   const { graph, perspectivePersonId, selectedPersonId, relationships, photos, darkMode } = state;
 
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
-  const [showLineageColors, setShowLineageColors] = useState(
-    () => localStorage.getItem('chonmap_lineage_colors') === 'true'
-  );
-  const toggleLineageColors = useCallback(() => {
-    setShowLineageColors(prev => {
-      const next = !prev;
-      localStorage.setItem('chonmap_lineage_colors', next ? 'true' : 'false');
-      return next;
-    });
-  }, []);
+  const showLineageColors = false; // 계통 색상 기능 제거
   const toggleCollapse = useCallback((personId: string) => {
     setCollapsedIds(prev => {
       const next = new Set(prev);
@@ -405,26 +396,6 @@ export function FamilyTreeSVG({ searchQuery }: FamilyTreeSVGProps) {
 
       {/* 우상단 버튼 그룹 */}
       <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
-        <button
-          onClick={() => dispatch({ type: 'SORT_CHILDREN_BY_AGE' })}
-          title="형제/자녀를 나이순으로 정렬"
-          style={{
-            background: btnBg, border: `1px solid ${btnBorder}`,
-            borderRadius: 8, padding: '4px 8px', fontSize: 11, color: btnColor,
-            cursor: 'pointer', fontWeight: 600,
-          }}
-        >↕ 나이순</button>
-        <button
-          onClick={toggleLineageColors}
-          title={showLineageColors ? '계통 색상 끄기' : '부계/모계 색상 구분'}
-          style={{
-            background: showLineageColors ? (dk ? '#1E3A5F' : '#DBEAFE') : btnBg,
-            border: `1px solid ${showLineageColors ? '#3B82F6' : btnBorder}`,
-            borderRadius: 8, padding: '4px 8px', fontSize: 11,
-            color: showLineageColors ? '#3B82F6' : btnColor,
-            cursor: 'pointer', fontWeight: 600,
-          }}
-        >🎨 계통</button>
         <button
           onClick={toggleHorizontal}
           title={horizontal ? '세로 보기' : '가로 보기'}
