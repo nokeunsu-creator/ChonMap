@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chonmap-v1.3.0';
+const CACHE_NAME = 'chonmap-v1.4.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -26,11 +26,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  const sameOrigin = url.origin === self.location.origin;
+  // 외부 origin은 SW가 개입하지 않음 (브라우저 기본 처리)
+  if (url.origin !== self.location.origin) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (sameOrigin && response.status === 200 && response.type === 'basic') {
+        if (response.status === 200 && response.type === 'basic') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
@@ -39,8 +41,12 @@ self.addEventListener('fetch', (event) => {
       .catch(() =>
         caches.match(event.request).then((cached) => {
           if (cached) return cached;
-          if (url.pathname.startsWith('/app')) return caches.match('/app/');
-          return caches.match('/');
+          // 네비게이션 요청만 SPA 셸로 fallback (JS/CSS/이미지는 그냥 실패)
+          if (event.request.mode === 'navigate') {
+            if (url.pathname.startsWith('/app')) return caches.match('/app/');
+            return caches.match('/');
+          }
+          return Response.error();
         })
       )
   );
@@ -48,7 +54,7 @@ self.addEventListener('fetch', (event) => {
 
 // 생일 알림: 앱에서 메시지 수신 → 시스템 알림 표시
 self.addEventListener('message', (event) => {
-  if (event.origin && event.origin !== self.location.origin) return;
+  if (event.origin !== self.location.origin) return;
   if (!event.data || event.data.type !== 'BIRTHDAY_NOTIFY') return;
 
   const sanitize = (arr) => {

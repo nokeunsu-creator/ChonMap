@@ -54,6 +54,7 @@ function generatePuzzle(): number[] {
 }
 
 // 사용자 수식 평가 (Shunting-yard 기반, eval/Function 미사용)
+// 단항 마이너스는 'u-' 별도 연산자로 처리해 곱셈/나눗셈 우선순위와 정확히 결합 (예: 2*-3+4 = -2)
 function evaluate(expr: string): number | null {
   if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
   const tokens: (string | number)[] = [];
@@ -77,16 +78,16 @@ function evaluate(expr: string): number | null {
     }
     return null;
   }
-  // 단항 마이너스: 시작 또는 (·연산자 직후의 '-' → 0과 결합
+  // 단항 마이너스 식별 → 'u-' 별도 토큰
   const norm: (string | number)[] = [];
   for (let k = 0; k < tokens.length; k++) {
     const t = tokens[k];
     const prev = norm[norm.length - 1];
-    const isUnary = t === '-' && (prev === undefined || prev === '(' || prev === '+' || prev === '-' || prev === '*' || prev === '/');
-    if (isUnary) { norm.push(0); norm.push('-'); } else { norm.push(t); }
+    const isUnary = t === '-' && (prev === undefined || prev === '(' || prev === '+' || prev === '-' || prev === '*' || prev === '/' || prev === 'u-');
+    norm.push(isUnary ? 'u-' : t);
   }
-  // Shunting-yard
-  const prec: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 };
+  // Shunting-yard (u-는 우선순위 3, 우결합)
+  const prec: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2, 'u-': 3 };
   const out: (string | number)[] = [];
   const ops: string[] = [];
   for (const t of norm) {
@@ -98,7 +99,12 @@ function evaluate(expr: string): number | null {
       ops.pop();
       continue;
     }
-    while (ops.length && ops[ops.length - 1] !== '(' && prec[ops[ops.length - 1]] >= prec[t]) {
+    const isRightAssoc = t === 'u-';
+    while (
+      ops.length && ops[ops.length - 1] !== '(' &&
+      (prec[ops[ops.length - 1]] > prec[t] ||
+        (prec[ops[ops.length - 1]] === prec[t] && !isRightAssoc))
+    ) {
       out.push(ops.pop()!);
     }
     ops.push(t);
@@ -112,6 +118,12 @@ function evaluate(expr: string): number | null {
   const stack: number[] = [];
   for (const t of out) {
     if (typeof t === 'number') { stack.push(t); continue; }
+    if (t === 'u-') {
+      const a = stack.pop();
+      if (a === undefined) return null;
+      stack.push(-a);
+      continue;
+    }
     const b = stack.pop();
     const a = stack.pop();
     if (a === undefined || b === undefined) return null;

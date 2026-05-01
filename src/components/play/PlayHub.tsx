@@ -1,22 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useFamily } from '../../state/FamilyContext';
 import { useAndroidBack } from '../../utils/useAndroidBack';
-import { KinshipQuiz } from '../quiz/KinshipQuiz';
-import { TwentyFour } from './games/TwentyFour';
-import { MemoryGame } from './games/MemoryGame';
-import { WhackMole, ToyHammer } from './games/WhackMole';
-import { Omok } from './games/Omok';
-import { Baduk } from './games/Baduk';
-import { Janggi } from './games/Janggi';
-import { Chess } from './games/Chess';
-import {
-  ProverbQuizGame, SpellingQuizGame, FlagQuizGame,
-  ContinentQuizGame, DinosaurQuizGame, SpaceQuizGame, HanjaQuizGame,
-  LogicQuizGame, SafetyQuizGame,
-  BadukClassroomGame, EnglishChampionshipGame, HistoryQuizGame, ScienceQuizGame,
-  NonsenseQuizGame, WordMatchingGame, MathSpeedQuizGame, ShapeQuizGame,
-  MathChampionshipGame, WordBattleGame, WordSprintGame,
-} from './games/learn';
+import { ToyHammer } from './games/ToyHammer';
+
+// 가벼운 캐주얼 게임은 메인 청크에 유지(빠른 진입)
+const KinshipQuiz = lazy(() => import('../quiz/KinshipQuiz').then(m => ({ default: m.KinshipQuiz })));
+const TwentyFour = lazy(() => import('./games/TwentyFour').then(m => ({ default: m.TwentyFour })));
+const MemoryGame = lazy(() => import('./games/MemoryGame').then(m => ({ default: m.MemoryGame })));
+const WhackMole = lazy(() => import('./games/WhackMole').then(m => ({ default: m.WhackMole })));
+const Omok = lazy(() => import('./games/Omok').then(m => ({ default: m.Omok })));
+
+// 큰 전략 게임 — 각각 별도 청크
+const Baduk = lazy(() => import('./games/Baduk').then(m => ({ default: m.Baduk })));
+const Janggi = lazy(() => import('./games/Janggi').then(m => ({ default: m.Janggi })));
+const Chess = lazy(() => import('./games/Chess').then(m => ({ default: m.Chess })));
+
+// 학습 게임 21개 — barrel에서 같은 청크로 묶임 (첫 클릭 시 한 번에 로드)
+const ProverbQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.ProverbQuizGame })));
+const SpellingQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.SpellingQuizGame })));
+const FlagQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.FlagQuizGame })));
+const ContinentQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.ContinentQuizGame })));
+const DinosaurQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.DinosaurQuizGame })));
+const SpaceQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.SpaceQuizGame })));
+const HanjaQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.HanjaQuizGame })));
+const LogicQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.LogicQuizGame })));
+const SafetyQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.SafetyQuizGame })));
+const BadukClassroomGame = lazy(() => import('./games/learn').then(m => ({ default: m.BadukClassroomGame })));
+const EnglishChampionshipGame = lazy(() => import('./games/learn').then(m => ({ default: m.EnglishChampionshipGame })));
+const HistoryQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.HistoryQuizGame })));
+const ScienceQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.ScienceQuizGame })));
+const NonsenseQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.NonsenseQuizGame })));
+const WordMatchingGame = lazy(() => import('./games/learn').then(m => ({ default: m.WordMatchingGame })));
+const MathSpeedQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.MathSpeedQuizGame })));
+const ShapeQuizGame = lazy(() => import('./games/learn').then(m => ({ default: m.ShapeQuizGame })));
+const MathChampionshipGame = lazy(() => import('./games/learn').then(m => ({ default: m.MathChampionshipGame })));
+const WordBattleGame = lazy(() => import('./games/learn').then(m => ({ default: m.WordBattleGame })));
+const WordSprintGame = lazy(() => import('./games/learn').then(m => ({ default: m.WordSprintGame })));
+const FindDifferenceGame = lazy(() => import('./games/learn').then(m => ({ default: m.FindDifferenceGame })));
 
 type GameId =
   | 'hub'
@@ -26,7 +46,7 @@ type GameId =
   | 'dinosaur' | 'space' | 'hanja' | 'logic' | 'safety'
   | 'baduk-classroom' | 'english-championship' | 'history' | 'science' | 'nonsense'
   | 'word-matching' | 'math-speed' | 'shape' | 'math-champ'
-  | 'word-battle' | 'word-sprint';
+  | 'word-battle' | 'word-sprint' | 'find-difference';
 
 type Category = 'family' | 'casual' | 'strategy' | 'learn';
 
@@ -54,6 +74,7 @@ const GAMES: GameMeta[] = [
   { id: 'twentyfour', category: 'casual', icon: '\u{1F3B2}', title: '24점 퍼즐', desc: '숫자 4개로 24 만들기', tag: '두뇌' },
   { id: 'memory',     category: 'casual', icon: '\u{1F0CF}', title: '카드 뒤집기', desc: '짝 맞추기 메모리', tag: '기억력' },
   { id: 'whack',      category: 'casual', icon: <ToyHammer size={44} rotation={-20} />, title: '두더지 잡기', desc: '30초 반사신경', tag: '반사' },
+  { id: 'find-difference', category: 'casual', icon: '\u{1F50D}', title: '틀린 그림 찾기', desc: '두 그림 비교', tag: '관찰' },
 
   // 전략
   { id: 'omok',   category: 'strategy', icon: '\u{26AB}', title: '오목', desc: '5개 먼저 잇기', tag: '전략' },
@@ -99,39 +120,50 @@ export function PlayHub() {
 
   useAndroidBack(current !== 'hub', goBack);
 
-  // 기존 게임
-  if (current === 'kinship')    return <KinshipQuiz onBack={goBack} />;
-  if (current === 'twentyfour') return <TwentyFour onBack={goBack} />;
-  if (current === 'memory')     return <MemoryGame onBack={goBack} />;
-  if (current === 'whack')      return <WhackMole onBack={goBack} />;
-  if (current === 'omok')       return <Omok onBack={goBack} />;
-  if (current === 'baduk')      return <Baduk onBack={goBack} />;
-  if (current === 'janggi')     return <Janggi onBack={goBack} />;
-  if (current === 'chess')      return <Chess onBack={goBack} />;
-
-  // GradeQuiz 기반
-  if (current === 'proverb')    return <ProverbQuizGame onBack={goBack} />;
-  if (current === 'spelling')   return <SpellingQuizGame onBack={goBack} />;
-  if (current === 'flag')       return <FlagQuizGame onBack={goBack} />;
-  if (current === 'continent')  return <ContinentQuizGame onBack={goBack} />;
-  if (current === 'dinosaur')   return <DinosaurQuizGame onBack={goBack} />;
-  if (current === 'space')      return <SpaceQuizGame onBack={goBack} />;
-  if (current === 'hanja')      return <HanjaQuizGame onBack={goBack} />;
-  if (current === 'logic')      return <LogicQuizGame onBack={goBack} />;
-  if (current === 'safety')     return <SafetyQuizGame onBack={goBack} />;
-
-  // 독립 학습 게임
-  if (current === 'baduk-classroom')      return <BadukClassroomGame onBack={goBack} />;
-  if (current === 'english-championship') return <EnglishChampionshipGame onBack={goBack} />;
-  if (current === 'history')              return <HistoryQuizGame onBack={goBack} />;
-  if (current === 'science')              return <ScienceQuizGame onBack={goBack} />;
-  if (current === 'nonsense')             return <NonsenseQuizGame onBack={goBack} />;
-  if (current === 'word-matching')        return <WordMatchingGame onBack={goBack} />;
-  if (current === 'math-speed')           return <MathSpeedQuizGame onBack={goBack} />;
-  if (current === 'shape')                return <ShapeQuizGame onBack={goBack} />;
-  if (current === 'math-champ')           return <MathChampionshipGame onBack={goBack} />;
-  if (current === 'word-battle')          return <WordBattleGame onBack={goBack} />;
-  if (current === 'word-sprint')          return <WordSprintGame onBack={goBack} />;
+  if (current !== 'hub') {
+    let GameComponent: React.ReactNode = null;
+    if (current === 'kinship')    GameComponent = <KinshipQuiz onBack={goBack} />;
+    else if (current === 'twentyfour') GameComponent = <TwentyFour onBack={goBack} />;
+    else if (current === 'memory')     GameComponent = <MemoryGame onBack={goBack} />;
+    else if (current === 'whack')      GameComponent = <WhackMole onBack={goBack} />;
+    else if (current === 'omok')       GameComponent = <Omok onBack={goBack} />;
+    else if (current === 'baduk')      GameComponent = <Baduk onBack={goBack} />;
+    else if (current === 'janggi')     GameComponent = <Janggi onBack={goBack} />;
+    else if (current === 'chess')      GameComponent = <Chess onBack={goBack} />;
+    else if (current === 'proverb')    GameComponent = <ProverbQuizGame onBack={goBack} />;
+    else if (current === 'spelling')   GameComponent = <SpellingQuizGame onBack={goBack} />;
+    else if (current === 'flag')       GameComponent = <FlagQuizGame onBack={goBack} />;
+    else if (current === 'continent')  GameComponent = <ContinentQuizGame onBack={goBack} />;
+    else if (current === 'dinosaur')   GameComponent = <DinosaurQuizGame onBack={goBack} />;
+    else if (current === 'space')      GameComponent = <SpaceQuizGame onBack={goBack} />;
+    else if (current === 'hanja')      GameComponent = <HanjaQuizGame onBack={goBack} />;
+    else if (current === 'logic')      GameComponent = <LogicQuizGame onBack={goBack} />;
+    else if (current === 'safety')     GameComponent = <SafetyQuizGame onBack={goBack} />;
+    else if (current === 'baduk-classroom')      GameComponent = <BadukClassroomGame onBack={goBack} />;
+    else if (current === 'english-championship') GameComponent = <EnglishChampionshipGame onBack={goBack} />;
+    else if (current === 'history')              GameComponent = <HistoryQuizGame onBack={goBack} />;
+    else if (current === 'science')              GameComponent = <ScienceQuizGame onBack={goBack} />;
+    else if (current === 'nonsense')             GameComponent = <NonsenseQuizGame onBack={goBack} />;
+    else if (current === 'word-matching')        GameComponent = <WordMatchingGame onBack={goBack} />;
+    else if (current === 'math-speed')           GameComponent = <MathSpeedQuizGame onBack={goBack} />;
+    else if (current === 'shape')                GameComponent = <ShapeQuizGame onBack={goBack} />;
+    else if (current === 'math-champ')           GameComponent = <MathChampionshipGame onBack={goBack} />;
+    else if (current === 'word-battle')          GameComponent = <WordBattleGame onBack={goBack} />;
+    else if (current === 'word-sprint')          GameComponent = <WordSprintGame onBack={goBack} />;
+    else if (current === 'find-difference')      GameComponent = <FindDifferenceGame onBack={goBack} />;
+    return (
+      <Suspense fallback={
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          height: '100%', minHeight: 200, color: dark ? '#9CA3AF' : '#A09080', fontSize: 13,
+        }}>
+          <span>게임을 불러오는 중...</span>
+        </div>
+      }>
+        {GameComponent}
+      </Suspense>
+    );
+  }
 
   const goldColor = dark ? '#FBBF24' : '#8B6914';
   const textPrimary = dark ? '#F3F4F6' : '#3D2B1F';

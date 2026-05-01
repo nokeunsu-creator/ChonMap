@@ -278,14 +278,17 @@
         </div>
       </div>
 
+      <!-- AdSense 슬롯: 승인 후 광고 단위 ID를 받으면 활성화
       <div class="ad-slot">
         <ins class="adsbygoogle"
              style="display:block; text-align:center;"
              data-ad-layout="in-article"
              data-ad-format="fluid"
              data-ad-client="ca-pub-5109908749535030"
-             data-ad-slot=""></ins>
+             data-ad-slot="REPLACE_WITH_REAL_SLOT_ID"></ins>
       </div>
+      -->
+
 
       <h2>이렇게 사용하세요</h2>
       <div class="step-row">
@@ -376,7 +379,8 @@
     </footer>
 
     <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
+      // AdSense push: 슬롯 활성화 시 함께 활성화
+      // (adsbygoogle = window.adsbygoogle || []).push({});
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(() => {});

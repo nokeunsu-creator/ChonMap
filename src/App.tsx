@@ -1,12 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { useFamily } from './state/FamilyContext';
 import { FamilyTreeSVG } from './components/tree/FamilyTreeSVG';
 import { PersonForm } from './components/forms/PersonForm';
 import { EditForm } from './components/forms/EditForm';
-import { SettingsPage } from './components/settings/SettingsPage';
-import { RelationshipSearch } from './components/search/RelationshipSearch';
-import { PlayHub } from './components/play/PlayHub';
 import { TEMPLATES } from './storage/templates';
+
+// 탭 전환 시에만 로드되는 큰 컴포넌트 (코드 스플리팅)
+const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const RelationshipSearch = lazy(() => import('./components/search/RelationshipSearch').then(m => ({ default: m.RelationshipSearch })));
+const PlayHub = lazy(() => import('./components/play/PlayHub').then(m => ({ default: m.PlayHub })));
 import { AdBanner } from './components/ads/AdBanner';
 import { InterstitialAd, useInterstitialAd } from './components/ads/InterstitialAd';
 import { OnboardingTutorial, useOnboarding } from './components/onboarding/OnboardingTutorial';
@@ -320,12 +322,14 @@ export default function App() {
             {/* 하단 광고 배너 */}
             <AdBanner />
           </>
-        ) : activeTab === 'search' ? (
-          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><RelationshipSearch /></div>
-        ) : activeTab === 'play' ? (
-          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><PlayHub /></div>
         ) : (
-          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}><SettingsPage /></div>
+          <div style={{ flex: 1, overflow: 'auto', background: dk ? '#111827' : undefined }}>
+            <Suspense fallback={<TabLoading dark={dk} />}>
+              {activeTab === 'search' && <RelationshipSearch />}
+              {activeTab === 'play' && <PlayHub />}
+              {activeTab === 'settings' && <SettingsPage />}
+            </Suspense>
+          </div>
         )}
       </main>
 
@@ -432,3 +436,14 @@ const headerBtnStyle: React.CSSProperties = {
   fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
+
+function TabLoading({ dark }: { dark: boolean }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: '100%', minHeight: 200, color: dark ? '#9CA3AF' : '#A09080', fontSize: 13,
+    }}>
+      <span>불러오는 중...</span>
+    </div>
+  );
+}

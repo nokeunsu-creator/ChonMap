@@ -57,6 +57,12 @@
 - `graph.childOrder` 적용: 드래그/나이순 정렬 순서 반영
 - 인척 트리 정렬: `getStartY()` 로 이미 배치된 자녀 기준 y 오프셋 계산 → `genOffset` 보정
 
+## 코드 스플리팅 전략
+- **메인 청크 (~242KB)**: 가계도(`FamilyTreeSVG`, `PersonForm`, `EditForm`, `BirthdayBanner`, `AdBanner`, `OnboardingTutorial`, `RatingDialog`)만 즉시 로드
+- **탭 lazy** (`App.tsx`): `RelationshipSearch`(8KB), `SettingsPage`(19KB), `PlayHub`(13KB) — 탭 클릭 시 로드, `<Suspense>` fallback `TabLoading`
+- **게임 lazy** (`PlayHub.tsx`): 캐주얼 게임 5개(`KinshipQuiz/TwentyFour/Memory/WhackMole/Omok` 6~10KB), 전략 게임 3개(`Chess`/`Baduk`/`Janggi` 17~21KB) 별도 청크. 학습 게임 21개는 barrel로 묶여 단일 청크(`learn` 622KB) — 첫 학습 게임 클릭 시 한 번에 로드
+- **`ToyHammer` 분리**: PlayHub 카드 아이콘에서 정적 사용 → `WhackMole.tsx`에서 별도 파일(`ToyHammer.tsx`)로 추출해 lazy/static import 충돌 해소
+
 ## 라우팅 구조 (멀티페이지 빌드)
 - `/` → **정적 콘텐츠 랜딩 페이지** (`index.html`, AdSense 광고 호스트)
 - `/app/` → **SPA 가계도 앱** (`app/index.html`, AdSense 스크립트 없음, canonical은 `/`)
