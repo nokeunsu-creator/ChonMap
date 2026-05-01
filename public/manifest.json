@@ -2,7 +2,7 @@
   "name": "촌맵 - 우리 가족 가계도",
   "short_name": "촌맵",
   "description": "한국 촌수 기반 가계도 앱",
-  "start_url": "/",
+  "start_url": "/app/",
   "display": "standalone",
   "background_color": "#FDF6E3",
   "theme_color": "#8B6914",

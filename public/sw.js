@@ -1,7 +1,9 @@
-const CACHE_NAME = 'chonmap-v1.1.0';
+const CACHE_NAME = 'chonmap-v1.3.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/app/',
+  '/app/index.html',
   '/manifest.json',
 ];
 
@@ -23,35 +25,47 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  const sameOrigin = url.origin === self.location.origin;
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response.status === 200) {
+        if (sameOrigin && response.status === 200 && response.type === 'basic') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
       })
       .catch(() =>
-        caches.match(event.request).then((cached) => cached || caches.match('/'))
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          if (url.pathname.startsWith('/app')) return caches.match('/app/');
+          return caches.match('/');
+        })
       )
   );
 });
 
 // 생일 알림: 앱에서 메시지 수신 → 시스템 알림 표시
 self.addEventListener('message', (event) => {
+  if (event.origin && event.origin !== self.location.origin) return;
   if (!event.data || event.data.type !== 'BIRTHDAY_NOTIFY') return;
 
-  const { todayList, tomorrowList } = event.data;
+  const sanitize = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.slice(0, 20).map((s) => String(s).slice(0, 50));
+  };
+  const todayList = sanitize(event.data.todayList);
+  const tomorrowList = sanitize(event.data.tomorrowList);
 
   const notifications = [];
-  if (todayList && todayList.length > 0) {
+  if (todayList.length > 0) {
     notifications.push({
       title: '🎂 오늘 생일!',
       body: `${todayList.join(', ')}의 생일입니다. 축하해주세요!`,
     });
   }
-  if (tomorrowList && tomorrowList.length > 0) {
+  if (tomorrowList.length > 0) {
     notifications.push({
       title: '🎁 내일 생일 예정',
       body: `내일은 ${tomorrowList.join(', ')}의 생일입니다.`,
@@ -77,7 +91,7 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       if (clients.length > 0) return clients[0].focus();
-      return self.clients.openWindow('/');
+      return self.clients.openWindow('/app/');
     })
   );
 });

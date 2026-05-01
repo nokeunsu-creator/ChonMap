@@ -120,7 +120,16 @@ export function importGraphJSON(file: File): Promise<FamilyGraph> {
   });
 }
 
-// 프로필 사진 (별도 저장)
+// 프로필 사진 (별도 저장) — data URL 화이트리스트 (image/jpeg|png|webp base64만 허용)
+const SAFE_PHOTO_RE = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const MAX_PHOTO_BYTES = 600 * 1024; // 압축 후 500KB 한도 + 여유
+
+export function isSafePhotoDataUrl(s: unknown): s is string {
+  if (typeof s !== 'string') return false;
+  if (s.length === 0 || s.length > MAX_PHOTO_BYTES) return false;
+  return SAFE_PHOTO_RE.test(s);
+}
+
 export function savePhotos(photos: Record<string, string>): void {
   try {
     localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
@@ -132,7 +141,14 @@ export function savePhotos(photos: Record<string, string>): void {
 export function loadPhotos(): Record<string, string> {
   try {
     const data = localStorage.getItem(PHOTOS_KEY);
-    return data ? JSON.parse(data) : {};
+    if (!data) return {};
+    const parsed = JSON.parse(data);
+    if (!parsed || typeof parsed !== 'object') return {};
+    const out: Record<string, string> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (typeof k === 'string' && isSafePhotoDataUrl(v)) out[k] = v;
+    }
+    return out;
   } catch (e) {
     console.warn('사진 불러오기 실패:', e);
     return {};

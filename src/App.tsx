@@ -414,7 +414,8 @@ export default function App() {
           onRate={() => {
             setShowRating(false);
             setRatingNever();
-            window.open('https://play.google.com/store/apps/details?id=app.vercel.chonmap.twa', '_blank');
+            const w = window.open('https://play.google.com/store/apps/details?id=app.vercel.chonmap.twa', '_blank', 'noopener,noreferrer');
+            if (w) w.opener = null;
           }}
           onLater={() => { setShowRating(false); setRatingLater(); }}
           onNever={() => { setShowRating(false); setRatingNever(); }}

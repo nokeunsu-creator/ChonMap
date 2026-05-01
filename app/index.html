@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#8B6914" />
+    <meta name="description" content="촌맵 앱 — 한국식 8촌 체계를 기반으로 가족 호칭이 자동 계산되는 인터랙티브 가계도 도구입니다." />
+    <meta name="robots" content="noindex,follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="촌맵 앱 - 가계도 만들기" />
+    <meta property="og:description" content="한국식 촌수·호칭을 자동 계산하는 인터랙티브 가계도 앱." />
+    <meta property="og:url" content="https://chonmap.vercel.app/app/" />
+    <meta property="og:image" content="https://chonmap.vercel.app/icons/icon-512.png" />
+    <link rel="canonical" href="https://chonmap.vercel.app/" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="촌맵" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <title>촌맵 앱 - 가계도 만들기</title>
+  </head>
+  <body>
+    <div id="root">
+      <noscript>
+        <header style="background:#8B6914;color:white;padding:16px;text-align:center;">
+          <h1 style="margin:0;font-size:22px;">&#127809; 촌맵 - 한국식 촌수 기반 가계도</h1>
+        </header>
+        <main style="max-width:720px;margin:0 auto;padding:24px 20px;font-family:'Noto Sans KR',sans-serif;line-height:1.8;color:#3D2B1F;">
+          <p style="background:#FFF8E8;padding:14px;border-radius:8px;border-left:4px solid #C4961A;">
+            촌맵 앱을 사용하려면 JavaScript가 활성화된 브라우저가 필요합니다. 콘텐츠를 보시려면 <a href="/">홈으로 이동</a>하거나 아래 링크를 따라가 주세요.
+          </p>
+          <h2 style="color:#8B6914;">관련 콘텐츠</h2>
+          <ul>
+            <li><a href="/">촌맵 홈 - 서비스 소개</a></li>
+            <li><a href="/guide.html">이용 가이드</a> - 사용법 단계별 설명</li>
+            <li><a href="/chon/">촌수 알아보기</a> - 촌수·호칭 지식 허브</li>
+            <li><a href="/about.html">촌맵 소개</a></li>
+          </ul>
+        </main>
+      </noscript>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

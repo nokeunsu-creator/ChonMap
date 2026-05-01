@@ -7,7 +7,7 @@ import {
   saveGraph, saveGraphImmediate, loadGraph,
   isDarkMode as checkDarkMode,
   onStorageChange,
-  loadPhotos, savePhotos,
+  loadPhotos, savePhotos, isSafePhotoDataUrl,
 } from '../storage/StorageService';
 import { nanoid } from 'nanoid';
 
@@ -217,6 +217,10 @@ function familyReducer(state: FamilyState, action: FamilyAction): FamilyState {
     case 'SET_PHOTO': {
       if (action.dataUrl.length > 500 * 1024) {
         showToast('사진이 너무 큽니다 (500KB 초과). 더 작은 사진을 선택해주세요', 'error');
+        return state;
+      }
+      if (!isSafePhotoDataUrl(action.dataUrl)) {
+        showToast('지원하지 않는 사진 형식입니다 (JPEG/PNG/WebP만 가능)', 'error');
         return state;
       }
       return { ...state, photos: { ...state.photos, [action.personId]: action.dataUrl } };

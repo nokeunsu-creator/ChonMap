@@ -57,8 +57,17 @@
 - `graph.childOrder` 적용: 드래그/나이순 정렬 순서 반영
 - 인척 트리 정렬: `getStartY()` 로 이미 배치된 자녀 기준 y 오프셋 계산 → `genOffset` 보정
 
+## 라우팅 구조 (멀티페이지 빌드)
+- `/` → **정적 콘텐츠 랜딩 페이지** (`index.html`, AdSense 광고 호스트)
+- `/app/` → **SPA 가계도 앱** (`app/index.html`, AdSense 스크립트 없음, canonical은 `/`)
+- `/guide.html`, `/about.html`, `/contact.html`, `/privacy.html`, `/terms.html`, `/chon/*` → 정적 콘텐츠 페이지 (AdSense 광고)
+- `vite.config.ts`의 `rollupOptions.input`에 main + app 두 진입점 등록 → `dist/index.html`과 `dist/app/index.html` 동시 생성
+- AdSense 정책 준수를 위해 SPA 셸은 `noindex,follow`로 색인 회피, 모든 CTA는 `/app/`로 링크
+
 ## 폴더 구조
 ```
+index.html                       # 랜딩 페이지 (정적, AdSense 광고)
+app/index.html                   # SPA 셸 (canonical=/, noindex)
 src/
 ├── models/types.ts              # 데이터 모델 (childOrder 포함)
 ├── engine/
@@ -173,6 +182,8 @@ npx vercel --prod --yes
 ## 미완료
 - Google Play Store 심사 통과 대기 → 결과에 따라 추가 조치 필요
 - 인앱상품 등록 (chonmap_premium_unlock, ₩1,000) — Play Console에서 설정 필요
+- **AdSense 재검토 요청 필요**: `/`를 정적 랜딩으로, `/app/`을 SPA로 분리한 후 AdSense 콘솔에서 "검토 요청" 클릭 (chonmap.vercel.app 정책 위반 해소)
+- **TWA APK 재빌드 필요**: `manifest.json` `start_url`이 `/app/`로 변경됨. bubblewrap으로 APK 재빌드 → 새 AAB로 Play Console 업로드 필요
 
 ## 주의사항
 - `kinshipTitles.ts`는 if-else 기반. 새 호칭 추가 시 ascent/descent 조합 확인
@@ -182,8 +193,12 @@ npx vercel --prod --yes
 - 루트 인물(나)은 삭제 불가 (리듀서에서 차단)
 - 부모 삭제 시 고아 자녀 재귀 삭제됨 (다른 부모 없는 경우만)
 - localStorage 5MB 제한 (가족 200명 ≈ 50KB, 충분)
-- 사진 data URL 500KB 제한 (리듀서에서 차단)
+- 사진 data URL 500KB 제한 + 화이트리스트 검증 (`isSafePhotoDataUrl`: `data:image/(jpeg|png|webp);base64,...`만 허용). `loadPhotos`/`SET_PHOTO` 양쪽에서 검증
 - PersonForm은 인라인 스타일 + dk 변수로 다크모드, EditForm은 Tailwind + CSS 오버라이드
 - **드래그 stale closure**: endDrag는 useCallback([dispatch])만 의존. dragTargetOrder를 state가 아닌 `dragInfoRef.current.currentOrder`(ref)에서 읽어야 함
 - **레이아웃 루트 순서**: `findAncestorRoot()` 로 나의 직계 최상위 조상을 찾아 sortedRoots 첫 번째로 배치. 이 순서를 바꾸면 인척 트리 y 오프셋 계산이 틀어짐
-- AdSense: SPA는 크롤러가 JS 미실행 → 정적 HTML 페이지(guide, about, chon/*)에만 광고 스크립트 삽입. AD_SLOT은 AdSense 승인 후 채울 것
+- **AdSense 라우팅 전략**: 광고 스크립트는 `/`(랜딩) + 정적 페이지(guide, about, chon/*)에만 삽입. SPA 셸(`/app/`)은 `noindex,follow`로 색인 회피하고 AdSense 스크립트도 제거됨 — SPA는 행동 화면이라 "콘텐츠 없는 화면" 정책 위반 사유였음. AD_SLOT은 AdSense 승인 후 채울 것
+- **TWA start_url 변경**: `manifest.json` `start_url`이 `/app/`이므로 bubblewrap 재빌드가 필요하다. 기존 APK는 `/` 진입 시 랜딩 페이지가 나타나서 사용자 경험 손상
+- **CSP 정책**: `vercel.json`에서 `'unsafe-eval'` 제거 완료. `'unsafe-inline'`은 AdSense 인라인 호출(`(adsbygoogle = ...).push({})`) 때문에 유지. 후속 강화는 nonce 도입(Vercel Edge Middleware) 필요
+- **TwentyFour 평가기**: `new Function` 대신 Shunting-yard 기반 파서 사용 (`src/components/play/games/TwentyFour.tsx`). 정수/부동소수점, 단항 마이너스, 괄호 모두 지원. EPS=1e-6 비교로 부동소수점 오차 허용
+- **Service Worker 캐시 정책**: `sameOrigin && response.type === 'basic'`인 응답만 캐시. 외부(AdSense iframe 등) 응답은 캐시하지 않음. message 핸들러는 `event.origin === self.location.origin` 검증 + 입력 sanitize (배열 max 20개, 문자열 max 50자)

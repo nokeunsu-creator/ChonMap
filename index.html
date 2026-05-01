@@ -2,72 +2,381 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#8B6914" />
-    <meta name="description" content="한국식 8촌 체계 기반의 인터랙티브 가계도 앱. 사람을 탭하면 모든 호칭이 해당 인물 기준으로 자동 계산됩니다. 촌수 계산·친척 호칭·가계도 시각화를 한 번에." />
-    <meta name="keywords" content="촌맵, 가계도, 촌수, 촌수 계산, 친척 호칭, 가족 호칭, 가계도 앱, 족보" />
+    <meta name="description" content="촌맵(ChonMap)은 한국식 8촌 체계 기반의 인터랙티브 가계도 앱입니다. 사람을 탭하면 모든 호칭이 그 사람 기준으로 자동 계산됩니다. 부계·모계·인척 80여 호칭, 큰아버지·작은아버지 장유 구분까지 정확하게." />
+    <meta name="keywords" content="촌맵, 가계도, 촌수, 촌수 계산, 친척 호칭, 가족 호칭, 가계도 앱, 족보, 8촌, 외삼촌, 이모, 큰아버지, 작은아버지" />
     <meta name="author" content="촌맵" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="촌맵 - 한국식 촌수 기반 가계도" />
     <meta property="og:description" content="탭 한 번이면 모든 호칭이 바뀌는 인터랙티브 가계도. 8촌까지 자동 계산." />
     <meta property="og:url" content="https://chonmap.vercel.app/" />
     <meta property="og:image" content="https://chonmap.vercel.app/icons/icon-512.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="촌맵 - 우리 가족 가계도" />
     <meta name="twitter:description" content="한국식 촌수·호칭을 자동 계산하는 인터랙티브 가계도 앱." />
+    <meta name="twitter:image" content="https://chonmap.vercel.app/icons/icon-512.png" />
     <link rel="canonical" href="https://chonmap.vercel.app/" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="촌맵" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <title>촌맵 - 한국식 촌수 기반 가계도 | 친척 호칭 자동 계산</title>
+    <link rel="stylesheet" href="/shared/layout.css" />
+    <title>촌맵 - 한국식 촌수 기반 인터랙티브 가계도 | 친척 호칭 자동 계산</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5109908749535030"
          crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "촌맵 (ChonMap)",
+      "url": "https://chonmap.vercel.app/",
+      "description": "한국식 8촌 체계 기반의 인터랙티브 가계도 앱. 사람을 탭하면 모든 호칭이 해당 인물 기준으로 자동 계산됩니다.",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web, Android",
+      "inLanguage": "ko",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
+      "author": { "@type": "Organization", "name": "촌맵" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "촌맵은 무료로 사용할 수 있나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "네. 촌맵은 별도의 회원가입이나 결제 없이 누구나 무료로 사용할 수 있습니다. 모든 데이터는 사용자의 기기에만 저장되며 서버로 전송되지 않습니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "촌수란 무엇이고, 어떻게 계산하나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "촌수는 친족 사이의 거리를 숫자로 나타낸 한국 고유의 체계입니다. 부모-자녀 관계는 1촌이며, 형제는 2촌, 사촌은 4촌처럼 짝수로 늘어납니다. 촌맵은 0-1 BFS 알고리즘으로 부계·모계·배우자 경로를 모두 고려해 최단 촌수를 자동 계산합니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "큰아버지와 작은아버지를 구분해 주나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "네. 출생년도를 입력하면 아버지의 형은 큰아버지(백부), 동생은 작은아버지(숙부)로 자동 표시됩니다. 형/동생, 형수/제수처럼 장유에 따라 달라지는 호칭도 모두 자동으로 처리됩니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "외할아버지·외삼촌처럼 모계 호칭도 지원하나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "네. 어머니 쪽 가족(외가)은 부계와 별도로 구분되어 외할아버지·외할머니·외삼촌·이모·외사촌 등 정확한 호칭이 표시됩니다. 또한 인척(배우자의 가족, 형수, 매형 등)도 spouse-side와 blood-side로 구분해 80여 가지 호칭을 정확하게 표시합니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "가족 데이터는 어디에 저장되나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "모든 데이터는 사용자가 사용 중인 기기의 브라우저 로컬 저장소에 저장됩니다. 외부 서버로 전송되지 않으므로 개인정보 걱정 없이 사용할 수 있으며, JSON 파일로 직접 백업·복원할 수 있습니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "Android 앱으로도 사용할 수 있나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "네. 촌맵은 PWA(Progressive Web App)로 설계되어 모바일 브라우저에서 홈 화면 추가가 가능하며, Google Play Store용 Android 앱(TWA 기반)도 준비되어 있습니다." }
+        }
+      ]
+    }
+    </script>
+    <style>
+      .hero {
+        background: linear-gradient(135deg, #FFF8E8 0%, #F5E9CC 100%);
+        padding: 56px 20px 48px;
+        text-align: center;
+        border-bottom: 1px solid #E8DCC8;
+      }
+      .hero-eyebrow {
+        display: inline-block;
+        background: rgba(139, 105, 20, 0.12);
+        color: #8B6914;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        font-size: 38px;
+        line-height: 1.25;
+        margin: 0 0 16px;
+        color: #3D2B1F;
+        letter-spacing: -1px;
+      }
+      .hero h1 strong { color: #8B6914; }
+      .hero-tagline {
+        font-size: 17px;
+        color: #5D4A2F;
+        max-width: 640px;
+        margin: 0 auto 28px;
+        line-height: 1.7;
+      }
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #C4961A, #8B6914);
+        color: white;
+        font-weight: 700;
+        font-size: 17px;
+        padding: 16px 32px;
+        border-radius: 999px;
+        text-decoration: none;
+        box-shadow: 0 6px 20px rgba(139, 105, 20, 0.35);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+      .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 105, 20, 0.45); }
+      .hero-secondary {
+        display: inline-block;
+        margin-left: 14px;
+        color: #8B6914;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: underline;
+      }
+      .hero-screenshot {
+        margin: 36px auto 0;
+        max-width: 360px;
+        width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(61, 43, 31, 0.18);
+        display: block;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin: 24px 0 16px;
+      }
+      .feature-card {
+        background: white;
+        border: 1px solid #F0E6D6;
+        border-radius: 14px;
+        padding: 22px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      }
+      .feature-card .icon { font-size: 28px; display: block; margin-bottom: 10px; }
+      .feature-card h3 { margin: 0 0 8px; color: #8B6914; font-size: 16px; }
+      .feature-card p { margin: 0; font-size: 14px; color: #5D4A2F; line-height: 1.6; }
+      .step-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin: 24px 0;
+      }
+      .step-item {
+        position: relative;
+        background: #FFFCF5;
+        padding: 22px 20px 20px;
+        border-radius: 14px;
+        border-left: 4px solid #C4961A;
+      }
+      .step-num {
+        position: absolute; top: -14px; left: 18px;
+        background: #8B6914; color: white;
+        font-weight: 700; font-size: 14px;
+        width: 28px; height: 28px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+      }
+      .step-item h3 { margin: 8px 0 8px; color: #3D2B1F; }
+      .step-item p { margin: 0; font-size: 14px; color: #5D4A2F; }
+      .ad-slot {
+        max-width: 720px;
+        margin: 28px auto;
+        padding: 0 20px;
+        text-align: center;
+      }
+      .use-list { columns: 2; column-gap: 28px; padding-left: 18px; }
+      .use-list li { break-inside: avoid; margin: 6px 0; }
+      @media (max-width: 540px) {
+        .hero h1 { font-size: 28px; }
+        .hero-tagline { font-size: 15px; }
+        .use-list { columns: 1; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root">
-      <noscript>
-        <header style="background:#8B6914;color:white;padding:16px;text-align:center;">
-          <h1 style="margin:0;font-size:22px;">&#127809; 촌맵 - 한국식 촌수 기반 가계도</h1>
-        </header>
-        <main style="max-width:720px;margin:0 auto;padding:24px 20px;font-family:'Noto Sans KR',sans-serif;line-height:1.8;color:#3D2B1F;">
-          <p style="background:#FFF8E8;padding:14px;border-radius:8px;border-left:4px solid #C4961A;">
-            촌맵을 사용하려면 JavaScript가 활성화된 브라우저가 필요합니다.
-          </p>
-          <h2 style="color:#8B6914;">촌맵이란?</h2>
-          <p>촌맵(ChonMap)은 <strong>한국식 8촌 체계 기반의 인터랙티브 가계도 앱</strong>입니다. 사람을 탭하면 모든 호칭이 해당 인물 기준으로 자동 변경됩니다. 80여 가지 한국식 호칭을 정확히 표시하며, 부계·모계·인척을 구분합니다.</p>
-          <h2 style="color:#8B6914;">주요 기능</h2>
-          <ul>
-            <li>한국식 8촌 자동 계산 (부계·모계·인척 구분)</li>
-            <li>기준 인물 변경 시 호칭 자동 재계산</li>
-            <li>관계 검색 및 경로 시각화</li>
-            <li>가족 템플릿 (핵가족·3대·양가)</li>
-            <li>데이터는 이용자 기기에만 저장 (완전한 프라이버시)</li>
-          </ul>
-          <h2 style="color:#8B6914;">관련 페이지</h2>
-          <ul>
-            <li><a href="/about.html">촌맵 소개</a> - 서비스 개요</li>
-            <li><a href="/guide.html">이용 가이드</a> - 사용법 단계별 설명</li>
-            <li><a href="/chon/">촌수 알아보기</a> - 촌수·호칭 지식 허브</li>
-            <li><a href="/chon/what-is-chon.html">촌수란 무엇인가요?</a></li>
-            <li><a href="/chon/how-to-count.html">촌수 계산법</a></li>
-            <li><a href="/chon/family-titles.html">가족 호칭 총정리</a></li>
-            <li><a href="/chon/family-tree.html">가계도란?</a></li>
-            <li><a href="/chon/holiday-guide.html">명절 친척 호칭 가이드</a></li>
-          </ul>
-          <h2 style="color:#8B6914;">정책 및 문의</h2>
-          <ul>
-            <li><a href="/privacy.html">개인정보처리방침</a></li>
-            <li><a href="/terms.html">이용약관</a></li>
-            <li><a href="/contact.html">문의하기</a></li>
-          </ul>
-        </main>
-      </noscript>
-    </div>
-    <script type="module" src="/src/main.tsx"></script>
+    <header class="site-header">
+      <a href="/" class="site-logo">촌맵<span class="subtitle">한국식 가계도</span></a>
+      <nav class="site-nav">
+        <a href="/">홈</a>
+        <a href="/guide.html">이용 가이드</a>
+        <a href="/chon/">촌수 알아보기</a>
+        <a href="/about.html">소개</a>
+        <a href="/contact.html">문의</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <span class="hero-eyebrow">한국식 8촌 체계 · 80+ 호칭 자동 계산</span>
+      <h1>탭 한 번이면<br><strong>모든 호칭이 바뀝니다</strong></h1>
+      <p class="hero-tagline">
+        촌맵(ChonMap)은 한국 가족의 정교한 호칭 체계를 직관적으로 풀어낸 인터랙티브 가계도 앱입니다.
+        사람을 탭하면 그 사람이 기준이 되어, 가계도 전체의 호칭이 자동으로 재계산됩니다.
+        큰아버지와 작은아버지, 외삼촌과 이모, 형수와 매형까지 — 헷갈렸던 모든 친척 호칭을 한 번에 정리하세요.
+      </p>
+      <a href="/app/" class="hero-cta">&#127809; 가계도 만들기 시작</a>
+      <a href="/guide.html" class="hero-secondary">먼저 사용법 보기 &rarr;</a>
+      <img src="/screenshots/tree-wide.png" alt="촌맵 3대 가족 가계도 화면 예시 — 본인 기준 호칭이 표시된 인터랙티브 가계도" class="hero-screenshot" />
+    </section>
+
+    <main class="container">
+
+      <h2>왜 촌맵인가요?</h2>
+      <p>한국의 친족 호칭 체계는 세계적으로도 손꼽힐 만큼 정교합니다. <strong>큰아버지와 작은아버지</strong>가 다르고, <strong>외삼촌과 이모</strong>의 이름이 전혀 다르며, 같은 4촌이라도 부계 사촌과 모계 외사촌의 호칭이 갈립니다. 게다가 <strong>처남·처제·시동생·시누이·올케·동서·매형·형수</strong>처럼 인척 호칭은 더욱 복잡해집니다.</p>
+      <p>이러한 정교함은 한국 문화의 풍요로움이지만, 명절·혼례·집안 행사에서 누구나 한 번쯤 누가 누구인지 헷갈려본 경험이 있을 것입니다. 촌맵은 이 복잡함을 <strong>"기준을 바꾸면 호칭도 바뀐다"</strong>는 단순한 원리로 풀어냅니다. 할머니의 시선에서는 내가 손자이지만, 사촌의 시선에서는 내가 사촌형이 됩니다. 촌맵은 탭 한 번으로 이 모든 관점을 자유롭게 전환하며, 가족이라는 네트워크를 시각적으로 탐색할 수 있게 해 줍니다.</p>
+
+      <h2>주요 기능</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="icon">&#128200;</span>
+          <h3>한국식 8촌 자동 계산</h3>
+          <p>0-1 BFS 알고리즘이 부계·모계·배우자 경로를 모두 고려해 최단 촌수를 정확히 계산합니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#128100;</span>
+          <h3>관점 전환</h3>
+          <p>인물을 탭하면 그 사람이 기준이 되어 가계도 전체의 호칭이 자동 재계산됩니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#128203;</span>
+          <h3>80+ 한국식 호칭</h3>
+          <p>큰아버지·작은아버지, 외삼촌·이모, 형수·매형, 처남·올케 등 부계·모계·인척 호칭을 정확히 구분합니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#127942;</span>
+          <h3>가족 템플릿</h3>
+          <p>핵가족 4인, 3대 가족 8인, 양가 가족 12인 등 미리 만들어진 템플릿으로 빠르게 시작할 수 있습니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#128269;</span>
+          <h3>관계 검색</h3>
+          <p>두 사람을 선택하면 호칭, 촌수, 가계도상의 경로를 한 번에 보여줍니다. 헷갈리는 관계도 즉시 확인.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#127918;</span>
+          <h3>가족 미니게임</h3>
+          <p>호칭 퀴즈, 24점 퍼즐, 카드 뒤집기, 두더지 잡기, 오목·바둑·장기·체스까지 온 가족이 즐길 수 있습니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#129504;</span>
+          <h3>두뇌·상식 퀴즈</h3>
+          <p>사자성어, 맞춤법, 한자, 세계 국기, 공룡, 우주, 한국사, 과학 등 21종 난이도별 퀴즈를 제공합니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#127874;</span>
+          <h3>기념일 캘린더</h3>
+          <p>가족의 생일·기일을 등록하면 당일·전일 자동 배너와 시스템 알림(Android)이 표시됩니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#128196;</span>
+          <h3>PDF 족보 출력</h3>
+          <p>가족 전체 목록을 정리한 족보를 PDF로 저장해 친지와 공유하거나 인쇄할 수 있습니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">&#128274;</span>
+          <h3>완전한 프라이버시</h3>
+          <p>모든 정보는 사용자 기기에만 저장됩니다. 서버 전송 없음. JSON 백업·복원으로 데이터 소유권은 사용자에게.</p>
+        </div>
+      </div>
+
+      <div class="ad-slot">
+        <ins class="adsbygoogle"
+             style="display:block; text-align:center;"
+             data-ad-layout="in-article"
+             data-ad-format="fluid"
+             data-ad-client="ca-pub-5109908749535030"
+             data-ad-slot=""></ins>
+      </div>
+
+      <h2>이렇게 사용하세요</h2>
+      <div class="step-row">
+        <div class="step-item">
+          <span class="step-num">1</span>
+          <h3>가족 추가하기</h3>
+          <p>우측 하단 ➕ 버튼을 눌러 부모·자녀·형제·배우자를 추가합니다. 이름만 필수이며, 출생년도를 입력하면 큰아버지/작은아버지가 자동 구분됩니다.</p>
+        </div>
+        <div class="step-item">
+          <span class="step-num">2</span>
+          <h3>인물 탭으로 기준 변경</h3>
+          <p>가계도 안의 어떤 사람이든 탭하면 그 사람이 "기준"이 되어 모든 호칭이 그 사람 시점으로 재계산됩니다. 헤더의 기준 표시를 누르면 다시 "나"로 돌아옵니다.</p>
+        </div>
+        <div class="step-item">
+          <span class="step-num">3</span>
+          <h3>관계 검색·공유</h3>
+          <p>두 사람의 관계가 헷갈릴 때는 관계 검색 탭에서 두 사람을 선택해 정확한 호칭과 촌수를 확인하고, 이미지·PDF로 가계도를 공유하세요.</p>
+        </div>
+      </div>
+
+      <h2>이런 분께 추천합니다</h2>
+      <ul class="use-list">
+        <li>명절이나 집안 행사에서 친척 호칭이 헷갈렸던 분</li>
+        <li>자녀에게 가족 관계를 쉽게 설명하고 싶은 부모</li>
+        <li>가계도를 시각적으로 정리하고 싶은 분</li>
+        <li>혼례 이후 새 인척 관계를 익혀야 하는 분</li>
+        <li>한국어 학습 중인 외국인 또는 재외동포</li>
+        <li>족보를 현대적으로 재해석하고 싶은 분</li>
+      </ul>
+
+      <h2>스크린샷</h2>
+      <div class="screenshot-grid">
+        <div>
+          <img src="/screenshots/tree-basic.png" alt="촌맵 본인 기준 가계도 화면" />
+          <p class="screenshot-caption">본인 기준 화면</p>
+        </div>
+        <div>
+          <img src="/screenshots/tree-perspective.png" alt="다른 인물 기준으로 호칭이 재계산된 가계도 화면" />
+          <p class="screenshot-caption">다른 인물 기준으로 변경 시</p>
+        </div>
+      </div>
+
+      <h2>자주 묻는 질문</h2>
+      <h3>Q. 촌맵은 무료로 사용할 수 있나요?</h3>
+      <p>네. 촌맵은 별도의 회원가입이나 결제 없이 누구나 무료로 사용할 수 있습니다. 모든 데이터는 사용자의 기기에만 저장되며 서버로 전송되지 않습니다.</p>
+
+      <h3>Q. 촌수란 무엇이고, 어떻게 계산하나요?</h3>
+      <p>촌수는 친족 사이의 거리를 숫자로 나타낸 한국 고유의 체계입니다. 부모-자녀 관계는 1촌이며, 형제는 2촌, 사촌은 4촌처럼 짝수로 늘어납니다. 촌맵은 0-1 BFS 알고리즘으로 부계·모계·배우자 경로를 모두 고려해 최단 촌수를 자동 계산합니다. <a href="/chon/how-to-count.html">자세한 촌수 계산법 보기</a></p>
+
+      <h3>Q. 큰아버지와 작은아버지를 구분해 주나요?</h3>
+      <p>네. 출생년도를 입력하면 아버지의 형은 큰아버지(백부), 동생은 작은아버지(숙부)로 자동 표시됩니다. 형/동생, 형수/제수처럼 장유에 따라 달라지는 호칭도 모두 자동으로 처리됩니다.</p>
+
+      <h3>Q. 외할아버지·외삼촌처럼 모계 호칭도 지원하나요?</h3>
+      <p>네. 어머니 쪽 가족(외가)은 부계와 별도로 구분되어 외할아버지·외할머니·외삼촌·이모·외사촌 등 정확한 호칭이 표시됩니다. 또한 인척(배우자의 가족, 형수, 매형 등)도 spouse-side와 blood-side로 구분해 80여 가지 호칭을 정확하게 표시합니다.</p>
+
+      <h3>Q. 가족 데이터는 어디에 저장되나요?</h3>
+      <p>모든 데이터는 사용자가 사용 중인 기기의 브라우저 로컬 저장소에 저장됩니다. 외부 서버로 전송되지 않으므로 개인정보 걱정 없이 사용할 수 있으며, JSON 파일로 직접 백업·복원할 수 있습니다.</p>
+
+      <h3>Q. Android 앱으로도 사용할 수 있나요?</h3>
+      <p>네. 촌맵은 PWA(Progressive Web App)로 설계되어 모바일 브라우저에서 홈 화면 추가가 가능하며, Google Play Store용 Android 앱(TWA 기반)도 준비되어 있습니다.</p>
+
+      <h2>더 알아보기</h2>
+      <div class="related">
+        <ul>
+          <li><a href="/guide.html">이용 가이드</a> - 5분이면 익히는 단계별 사용법</li>
+          <li><a href="/chon/what-is-chon.html">촌수란 무엇일까요?</a> - 한국 친족 체계의 기초</li>
+          <li><a href="/chon/how-to-count.html">촌수 계산법 완전 정리</a> - 1촌부터 8촌까지</li>
+          <li><a href="/chon/family-titles.html">가족 호칭 총정리</a> - 부계·모계·인척 호칭 사전</li>
+          <li><a href="/chon/family-tree.html">가계도란?</a> - 가계도의 역사와 의미</li>
+          <li><a href="/chon/holiday-guide.html">명절 친척 호칭 가이드</a></li>
+          <li><a href="/about.html">촌맵 소개</a> - 만든 이유와 비전</li>
+        </ul>
+      </div>
+
+      <a href="/app/" class="cta">&rarr; 지금 가계도 만들기</a>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <a href="/about.html">소개</a> ·
+        <a href="/guide.html">이용 가이드</a> ·
+        <a href="/privacy.html">개인정보처리방침</a> ·
+        <a href="/terms.html">이용약관</a>
+        <br>
+        <a href="/contact.html">문의</a>
+      </div>
+      <div class="copyright">© 2026 촌맵(ChonMap). All rights reserved.</div>
+    </footer>
+
     <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(() => {});

@@ -53,18 +53,82 @@ function generatePuzzle(): number[] {
   return [1, 2, 3, 4]; // fallback (1*2*3*4 = 24)
 }
 
-// 사용자 수식 평가 (안전한 문자만 허용)
+// 사용자 수식 평가 (Shunting-yard 기반, eval/Function 미사용)
 function evaluate(expr: string): number | null {
   if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
-  try {
-    // eslint-disable-next-line no-new-func
-    const fn = new Function('return (' + expr + ')');
-    const v = fn();
-    if (typeof v !== 'number' || !isFinite(v)) return null;
-    return v;
-  } catch {
+  const tokens: (string | number)[] = [];
+  let i = 0;
+  while (i < expr.length) {
+    const c = expr[i];
+    if (c === ' ' || c === '\t') { i++; continue; }
+    if (c >= '0' && c <= '9') {
+      let j = i;
+      while (j < expr.length && ((expr[j] >= '0' && expr[j] <= '9') || expr[j] === '.')) j++;
+      const n = parseFloat(expr.slice(i, j));
+      if (!Number.isFinite(n)) return null;
+      tokens.push(n);
+      i = j;
+      continue;
+    }
+    if (c === '+' || c === '-' || c === '*' || c === '/' || c === '(' || c === ')') {
+      tokens.push(c);
+      i++;
+      continue;
+    }
     return null;
   }
+  // 단항 마이너스: 시작 또는 (·연산자 직후의 '-' → 0과 결합
+  const norm: (string | number)[] = [];
+  for (let k = 0; k < tokens.length; k++) {
+    const t = tokens[k];
+    const prev = norm[norm.length - 1];
+    const isUnary = t === '-' && (prev === undefined || prev === '(' || prev === '+' || prev === '-' || prev === '*' || prev === '/');
+    if (isUnary) { norm.push(0); norm.push('-'); } else { norm.push(t); }
+  }
+  // Shunting-yard
+  const prec: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 };
+  const out: (string | number)[] = [];
+  const ops: string[] = [];
+  for (const t of norm) {
+    if (typeof t === 'number') { out.push(t); continue; }
+    if (t === '(') { ops.push(t); continue; }
+    if (t === ')') {
+      while (ops.length && ops[ops.length - 1] !== '(') out.push(ops.pop()!);
+      if (!ops.length) return null;
+      ops.pop();
+      continue;
+    }
+    while (ops.length && ops[ops.length - 1] !== '(' && prec[ops[ops.length - 1]] >= prec[t]) {
+      out.push(ops.pop()!);
+    }
+    ops.push(t);
+  }
+  while (ops.length) {
+    const op = ops.pop()!;
+    if (op === '(') return null;
+    out.push(op);
+  }
+  // 후위 평가
+  const stack: number[] = [];
+  for (const t of out) {
+    if (typeof t === 'number') { stack.push(t); continue; }
+    const b = stack.pop();
+    const a = stack.pop();
+    if (a === undefined || b === undefined) return null;
+    let r: number;
+    switch (t) {
+      case '+': r = a + b; break;
+      case '-': r = a - b; break;
+      case '*': r = a * b; break;
+      case '/': if (b === 0) return null; r = a / b; break;
+      default: return null;
+    }
+    stack.push(r);
+  }
+  if (stack.length !== 1) return null;
+  const v = stack[0];
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null;
+  return v;
 }
 
 function extractDigits(expr: string): number[] {
