@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { WORD_TOPICS } from '../../../../data/englishWords'
 import { SENTENCE_LEVELS } from '../../../../data/englishSentences'
 import { getData, addScore, addDiamonds, updateRecord } from '../../../../utils/pm/englishStorage'
+import { speakEn, cancelSpeech, isTtsMuted, setTtsMuted } from '../../../../utils/pm/tts'
 
 // ============ HELPERS ============
 
@@ -176,6 +177,16 @@ export default function EnglishChampionship({ onBack }) {
   const [sentenceAnswer, setSentenceAnswer] = useState([])
   const [sentenceAvailable, setSentenceAvailable] = useState([])
 
+  const [muted, setMuted] = useState(() => isTtsMuted())
+
+  const toggleMute = () => {
+    setMuted(prev => {
+      const next = !prev
+      setTtsMuted(next)
+      return next
+    })
+  }
+
   const timerRef = useRef(null)
   const feedbackTimerRef = useRef(null)
   const scoreRef = useRef(0)
@@ -233,8 +244,13 @@ export default function EnglishChampionship({ onBack }) {
   useEffect(() => {
     return () => {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+      cancelSpeech()
     }
   }, [])
+
+  useEffect(() => {
+    if (phase !== 'playing') cancelSpeech()
+  }, [phase])
 
   const handleTimeout = () => {
     if (answered) return
@@ -301,6 +317,7 @@ export default function EnglishChampionship({ onBack }) {
   // ============ WORD QUESTION HANDLER ============
   const handleWordChoice = (choice) => {
     if (answered) return
+    speakEn(choice, muted)
     const isCorrect = choice === currentQuestion.correctEn
     submitAnswer(isCorrect, timeLeft)
   }
@@ -336,6 +353,7 @@ export default function EnglishChampionship({ onBack }) {
   // ============ SENTENCE HANDLERS ============
   const handleSentenceTapAvailable = (wordObj) => {
     if (answered) return
+    speakEn(wordObj.text, muted)
     setSentenceAvailable(prev => prev.filter(w => w.id !== wordObj.id))
     setSentenceAnswer(prev => [...prev, wordObj])
   }
@@ -538,7 +556,14 @@ export default function EnglishChampionship({ onBack }) {
           <div style={{ fontSize: 13, color: '#FFF', fontWeight: 600 }}>
             문제 {currentQ + 1}/{questions.length}
           </div>
-          <div style={{ display: 'flex', gap: 14, fontSize: 13, color: '#FFF', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: 10, fontSize: 13, color: '#FFF', fontWeight: 600, alignItems: 'center' }}>
+            <button onClick={toggleMute} aria-label={muted ? '음소거 해제' : '음소거'}
+              style={{
+                background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8,
+                fontSize: 14, padding: '3px 8px', cursor: 'pointer', color: '#FFF',
+              }}>
+              {muted ? '🔇' : '🔊'}
+            </button>
             <span>점수: {score}</span>
             <span>⏱ {timeLeft}초</span>
           </div>

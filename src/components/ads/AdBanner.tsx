@@ -20,20 +20,10 @@ export function AdBanner() {
     } catch { /* AdSense 미로드 시 무시 */ }
   }, []);
 
-  // AdSense 미설정 시 플레이스홀더 (실제 배너 크기: 320x50 ~ 320x100)
+  // AdSense 미설정 시 아무것도 렌더하지 않음.
+  // 점선 '광고 영역' 플레이스홀더는 미완성 사이트 인상을 주어 심사에 불리함 (2026-06 감사).
   if (!AD_CLIENT || !AD_SLOT) {
-    return (
-      <div style={{
-        margin: '0 8px 6px', background: 'linear-gradient(135deg, #F5F0E0, #E8DCC8)',
-        borderRadius: 14, padding: '14px', textAlign: 'center', flexShrink: 0,
-        border: '1px dashed #C4961A', minHeight: 60,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <div style={{ fontSize: 12, color: '#8B7355' }}>
-          &#128226; 광고 영역
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

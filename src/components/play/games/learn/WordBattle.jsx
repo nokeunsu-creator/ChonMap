@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { WORD_TOPICS } from '../../../../data/englishWords'
 import { getData, addScore, addDiamonds, updateRecord } from '../../../../utils/pm/englishStorage'
+import { speakEn, cancelSpeech, isTtsMuted, setTtsMuted } from '../../../../utils/pm/tts'
 
 // 온라인 모드 제거 — 더미 room 객체
 function useGameRoom() {
@@ -65,8 +66,21 @@ export default function WordBattle({ onBack }) {
   const [joinCode, setJoinCode] = useState('')
   const [pendingTopic, setPendingTopic] = useState(null)
   const flipTimerRef = useRef(null)
+  const [muted, setMuted] = useState(() => isTtsMuted())
+
+  const toggleMute = () => {
+    setMuted(prev => {
+      const next = !prev
+      setTtsMuted(next)
+      return next
+    })
+  }
 
   const room = useGameRoom('wordBattle')
+
+  useEffect(() => {
+    return () => cancelSpeech()
+  }, [])
 
   // --- Local timer ---
   useEffect(() => {
@@ -163,6 +177,9 @@ export default function WordBattle({ onBack }) {
     if (lockRef.current) return
     if (flipped.includes(idx) || matched.includes(idx)) return
 
+    const card = cards[idx]
+    if (card && card.type === 'en') speakEn(card.text, muted)
+
     const next = [...flipped, idx]
     setFlipped(next)
 
@@ -205,6 +222,9 @@ export default function WordBattle({ onBack }) {
     const currentMatched = s.matched ? s.matched.split(',').map(Number) : []
     if (currentFlipped.length >= 2) return
     if (currentFlipped.includes(idx) || currentMatched.includes(idx)) return
+
+    const card = cards[idx]
+    if (card && card.type === 'en') speakEn(card.text, muted)
 
     const newFlipped = [...currentFlipped, idx]
     room.updateState({
@@ -407,9 +427,18 @@ export default function WordBattle({ onBack }) {
     <div style={{ padding: 16, maxWidth: 420, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <button onClick={resetToMenu} style={styles.backBtn}>← 뒤로</button>
-        <span style={{ fontSize: 14, color: '#888' }}>
-          {topicObj?.icon} {topicObj?.label}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 14, color: '#888' }}>
+            {topicObj?.icon} {topicObj?.label}
+          </span>
+          <button onClick={toggleMute} aria-label={muted ? '음소거 해제' : '음소거'}
+            style={{
+              background: muted ? '#F0F0F0' : '#FEF9E6', border: 'none',
+              borderRadius: 8, fontSize: 14, padding: '4px 8px', cursor: 'pointer',
+            }}>
+            {muted ? '🔇' : '🔊'}
+          </button>
+        </div>
       </div>
 
       {/* Status bar */}

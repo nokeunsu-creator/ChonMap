@@ -24,6 +24,8 @@ import MathChampionshipRaw from './MathChampionship.jsx';
 import WordBattleRaw from './WordBattle.jsx';
 // @ts-ignore
 import WordSprintRaw from './WordSprint.jsx';
+// @ts-ignore
+import FindDifferenceRaw from './FindDifference.jsx';
 
 // 데이터
 // @ts-ignore
@@ -59,6 +61,7 @@ const ShapeQuiz = ShapeQuizRaw as any;
 const MathChampionship = MathChampionshipRaw as any;
 const WordBattle = WordBattleRaw as any;
 const WordSprint = WordSprintRaw as any;
+const FindDifference = FindDifferenceRaw as any;
 
 interface Props { onBack: () => void }
 
@@ -96,3 +99,4 @@ export const ShapeQuizGame = ({ onBack }: Props) => <ShapeQuiz onBack={onBack} /
 export const MathChampionshipGame = ({ onBack }: Props) => <MathChampionship onBack={onBack} />;
 export const WordBattleGame = ({ onBack }: Props) => <WordBattle onBack={onBack} />;
 export const WordSprintGame = ({ onBack }: Props) => <WordSprint onBack={onBack} />;
+export const FindDifferenceGame = ({ onBack }: Props) => <FindDifference onBack={onBack} />;

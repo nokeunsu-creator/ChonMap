@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { WORD_TOPICS } from '../../../../data/englishWords'
 import { getData, addScore, addDiamonds, updateRecord, updateDailyChallenge, addWrongWord } from '../../../../utils/pm/englishStorage'
+import { speakEn, cancelSpeech, isTtsMuted, setTtsMuted } from '../../../../utils/pm/tts'
 
 // 온라인 모드 제거 — 더미 room 객체
 function useGameRoom() {
@@ -68,6 +69,15 @@ export default function WordSprint({ onBack }) {
   const [onlineGameStarted, setOnlineGameStarted] = useState(false)
   const [opponentScore, setOpponentScore] = useState(0)
   const [onlineWinner, setOnlineWinner] = useState('')
+  const [muted, setMuted] = useState(() => isTtsMuted())
+
+  const toggleMute = () => {
+    setMuted(prev => {
+      const next = !prev
+      setTtsMuted(next)
+      return next
+    })
+  }
 
   const timerRef = useRef(null)
   const countdownRef = useRef(null)
@@ -90,7 +100,13 @@ export default function WordSprint({ onBack }) {
         setTopicRecords(data.records.wordSprint)
       }
     } catch (e) { /* no data yet */ }
+    return () => cancelSpeech()
   }, [])
+
+  // Stop speech when leaving playing phase
+  useEffect(() => {
+    if (phase !== 'playing') cancelSpeech()
+  }, [phase])
 
   // Pick next word from topic, cycling through all before repeating
   const pickNextWord = useCallback((topic, used) => {
@@ -178,6 +194,8 @@ export default function WordSprint({ onBack }) {
     const selectedWord = choices[choiceIdx]
     const isCorrect = selectedWord.en === currentWord.en
     const correctIdx = choices.findIndex(c => c.en === currentWord.en)
+
+    speakEn(selectedWord.en, muted)
 
     if (isCorrect) {
       const newCombo = comboRef.current + 1
@@ -751,8 +769,17 @@ export default function WordSprint({ onBack }) {
             🔥 {combo}연속 {multiplier > 1 ? `(×${multiplier})` : ''}
           </div>
         )}
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#333' }}>
-          점수: {score}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={toggleMute} aria-label={muted ? '음소거 해제' : '음소거'}
+            style={{
+              background: muted ? '#F0F0F0' : '#FEF9E6', border: 'none',
+              borderRadius: 8, fontSize: 14, padding: '4px 8px', cursor: 'pointer',
+            }}>
+            {muted ? '🔇' : '🔊'}
+          </button>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#333' }}>
+            점수: {score}
+          </div>
         </div>
       </div>
 

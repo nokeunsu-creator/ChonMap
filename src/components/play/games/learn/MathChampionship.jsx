@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { generateArithmeticProblem, generateFractionProblem, generateShapeProblem, generateUnitProblem, generateClockProblem } from '../../../../data/mathData'
 import { getData, addScore, addDiamonds, updateRecord } from '../../../../utils/pm/mathStorage'
 
@@ -353,6 +353,25 @@ export default function MathChampionship({ onBack }) {
   const diffConfig = DIFFICULTIES.find(d => d.key === difficulty)
   const diffColor = diffConfig?.color || '#4895EF'
 
+  // 문제별 선택지: currentQuestion이 바뀔 때만 한 번 생성 (매 렌더마다 섞이지 않도록)
+  const choices = useMemo(() => {
+    if (!currentQuestion) return []
+    if (currentQuestion.choices) return currentQuestion.choices
+    const ans = currentQuestion.answer
+    const choiceSet = new Set()
+    choiceSet.add(ans)
+    let attempts = 0
+    while (choiceSet.size < 4 && attempts < 100) {
+      const spread = Math.max(Math.abs(ans) * 0.3, 5)
+      const offset = Math.floor(Math.random() * spread) + 1
+      const wrong = ans + (Math.random() < 0.5 ? offset : -offset)
+      if (wrong > 0 && wrong !== ans) choiceSet.add(wrong)
+      attempts++
+    }
+    while (choiceSet.size < 4) choiceSet.add(ans + choiceSet.size)
+    return shuffleArray([...choiceSet])
+  }, [currentQuestion])
+
   // ============ DIFFICULTY SELECT SCREEN ============
   if (phase === 'select') {
     return (
@@ -482,26 +501,6 @@ export default function MathChampionship({ onBack }) {
   const progressPct = ((currentQ + 1) / 20) * 100
 
   const shapeName = currentQuestion.type === 'shape' ? detectShapeFromQuestion(currentQuestion) : null
-
-  // Build choices - arithmetic problems from generateArithmeticProblem don't have choices
-  // They just have { text, answer }. We need to generate choices for them.
-  let choices = currentQuestion.choices
-  if (!choices) {
-    // generate 4 choices for arithmetic answers
-    const ans = currentQuestion.answer
-    const choiceSet = new Set()
-    choiceSet.add(ans)
-    let attempts = 0
-    while (choiceSet.size < 4 && attempts < 100) {
-      const spread = Math.max(Math.abs(ans) * 0.3, 5)
-      const offset = Math.floor(Math.random() * spread) + 1
-      const wrong = ans + (Math.random() < 0.5 ? offset : -offset)
-      if (wrong > 0 && wrong !== ans) choiceSet.add(wrong)
-      attempts++
-    }
-    while (choiceSet.size < 4) choiceSet.add(ans + choiceSet.size)
-    choices = shuffleArray([...choiceSet])
-  }
 
   return (
     <div className="fade-in" style={{ maxWidth: 480, margin: '0 auto', paddingBottom: '2rem' }}>

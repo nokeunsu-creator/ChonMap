@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { WORD_PAIRS } from '../../../../data/wordPairs'
 import { CHILD1, CHILD2 } from '../../../../utils/pm/stubs'
 import { submitQuizScore } from '../../../../utils/pm/stubs'
+import { speakEn, cancelSpeech, isTtsMuted, setTtsMuted } from '../../../../utils/pm/tts'
 
 const ROUND_SIZE = 4  // 한 라운드당 4쌍
 const PLAYER_KEY = 'word-match-player'
@@ -36,7 +37,19 @@ export default function WordMatching({ onBack }) {
   const [mistakes, setMistakes] = useState(0)
   const [startTime, setStartTime] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [muted, setMuted] = useState(() => isTtsMuted())
   const TOTAL_PAIRS = 12  // 한 게임에서 풀 쌍 수 (3라운드)
+
+  const toggleMute = () => {
+    setMuted(prev => {
+      const next = !prev
+      setTtsMuted(next)
+      return next
+    })
+  }
+
+  const ens = useMemo(() => shuffle(roundPairs.map(p => p.en)), [roundPairs])
+  const kos = useMemo(() => shuffle(roundPairs.map(p => p.ko)), [roundPairs])
 
   const choosePlayer = (name) => {
     setPlayer(name)
@@ -70,6 +83,17 @@ export default function WordMatching({ onBack }) {
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 500)
     return () => clearInterval(id)
   }, [phase, startTime])
+
+  // 플레이 종료 시 음성 정지
+  useEffect(() => {
+    if (phase === 'playing') return
+    cancelSpeech()
+  }, [phase])
+
+  // 언마운트 시 음성 정지
+  useEffect(() => {
+    return () => cancelSpeech()
+  }, [])
 
   // 라운드 완성 체크
   useEffect(() => {
@@ -163,14 +187,10 @@ export default function WordMatching({ onBack }) {
   if (phase === 'grade') {
     return (
       <div className="fade-in" style={{ maxWidth: 480, margin: '0 auto', padding: '2rem 1rem', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ marginBottom: 16 }}>
           <button onClick={onBack}
             style={{ background: 'none', border: 'none', fontSize: 15, color: 'var(--gray)', cursor: 'pointer' }}>
             ← 돌아가기
-          </button>
-          <button onClick={() => { try { localStorage.removeItem(PLAYER_KEY) } catch (_) {}; setPlayer(null) }}
-            style={{ background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 12, padding: '5px 12px', cursor: 'pointer', color: '#666' }}>
-            👤 {player} (바꾸기)
           </button>
         </div>
         <div style={{ fontSize: 56, marginBottom: 12 }}>🔤</div>
@@ -245,8 +265,6 @@ export default function WordMatching({ onBack }) {
   }
 
   // 플레이
-  const ens = useMemo(() => shuffle(roundPairs.map(p => p.en)), [roundPairs])
-  const kos = useMemo(() => shuffle(roundPairs.map(p => p.ko)), [roundPairs])
   const cellStyle = (selected, isMatched, isWrong) => ({
     padding: '14px 12px',
     borderRadius: 12,
@@ -268,6 +286,13 @@ export default function WordMatching({ onBack }) {
           ←
         </button>
         <h2 style={{ fontSize: 18, fontWeight: 700, flex: 1 }}>🔤 레벨 {grade} 매칭</h2>
+        <button onClick={toggleMute} aria-label={muted ? '음소거 해제' : '음소거'}
+          style={{
+            background: muted ? '#F0F0F0' : '#FEF9E6', border: 'none', borderRadius: 10,
+            fontSize: 16, padding: '4px 10px', cursor: 'pointer', marginRight: 8,
+          }}>
+          {muted ? '🔇' : '🔊'}
+        </button>
         <div style={{ fontSize: 12, color: '#666' }}>
           ⏱ {formatTime(elapsed)} · ❌ {mistakes}
         </div>
@@ -299,7 +324,11 @@ export default function WordMatching({ onBack }) {
             const isWrong = wrongPair?.en === en
             return (
               <button key={en}
-                onClick={() => { if (!isMatched) setSelectedEn(en) }}
+                onClick={() => {
+                  if (isMatched) return
+                  speakEn(en, muted)
+                  setSelectedEn(en)
+                }}
                 disabled={isMatched}
                 style={cellStyle(isSelected, isMatched, isWrong)}>
                 {en}
@@ -328,7 +357,7 @@ export default function WordMatching({ onBack }) {
       </div>
 
       <div style={{ fontSize: 12, color: '#AAA', textAlign: 'center', marginTop: 16 }}>
-        영단어 → 뜻 순서로 눌러 짝을 맞춰보세요 🎯
+        영단어를 누르면 소리가 나와요 {muted ? '🔇' : '🔊'} · 영단어 → 뜻 순서로 짝 맞추기 🎯
       </div>
     </div>
   )

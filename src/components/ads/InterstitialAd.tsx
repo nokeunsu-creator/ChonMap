@@ -3,6 +3,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 // TODO: AdMob 연동 시 실제 전면 광고로 교체
 // 현재는 자체 전면 광고 플레이스홀더 (닫기 가능)
 
+// AdSense 승인 전까지 전면 오버레이 전체 비활성화.
+// 가짜 '광고' 오버레이는 "탐색을 방해하는 팝업" 거절 사유에 해당함 (2026-06 감사).
+// 웹에서는 승인 후에도 켜지 말 것 — 전면 광고는 TWA 네이티브(AdMob)에서만 처리.
+const INTERSTITIAL_ENABLED: boolean = false;
+
 const SESSION_KEY = 'chonmap_last_active';
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30분
 
@@ -18,6 +23,7 @@ export function incrementSaveCount(): boolean {
 
 /** 어디서든 전면 광고 트리거 (커스텀 이벤트) */
 export function fireInterstitialAd(reason: string) {
+  if (!INTERSTITIAL_ENABLED) return;
   window.dispatchEvent(new CustomEvent('chonmap-interstitial', { detail: reason }));
 }
 
@@ -30,7 +36,7 @@ export function useInterstitialAd() {
   useEffect(() => {
     const checkSession = () => {
       const lastActive = localStorage.getItem(SESSION_KEY);
-      if (lastActive) {
+      if (lastActive && INTERSTITIAL_ENABLED) {
         const elapsed = Date.now() - parseInt(lastActive);
         if (elapsed > SESSION_TIMEOUT) {
           setAdReason('다시 오셨군요!');
@@ -67,6 +73,7 @@ export function useInterstitialAd() {
   }, []);
 
   const triggerAd = useCallback((reason: string) => {
+    if (!INTERSTITIAL_ENABLED) return;
     setAdReason(reason);
     setShowAd(true);
   }, []);
@@ -171,11 +178,6 @@ export function InterstitialAd({ reason, onClose }: InterstitialAdProps) {
             계속하기
           </button>
         )}
-      </div>
-
-      {/* 광고 표시 안내 */}
-      <div style={{ marginTop: 16, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
-        광고
       </div>
     </div>
   );
