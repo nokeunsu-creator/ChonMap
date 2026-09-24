@@ -9,11 +9,15 @@ export function lookupTitle(
   targetGender: Gender,
   speakerGender: Gender,
   isInLaw: boolean,
-  inLawType: InLawType,
+  rawInLawType: InLawType,
   seniority: 'elder' | 'younger' | 'unknown',
   maternalDescent: boolean = false,
+  peerGender?: Gender, // 대상과 같은 세대인 나의 직계 조상의 성별 (할아버지 형제 vs 할머니 형제)
 ): string {
   const chon = ascent + descent;
+  // 'double'(배우자 쪽 혈족의 배우자)은 1-1, 2-1에서만 별도 호칭. 그 외에는 배우자 쪽 가족과 같게 취급
+  const hasDoubleTitle = (ascent === 1 && descent === 1) || (ascent === 2 && descent === 1);
+  const inLawType: InLawType = rawInLawType === 'double' && !hasDoubleTitle ? 'spouse-side' : rawInLawType;
 
   // === 0촌: 본인 ===
   if (chon === 0 && !isInLaw) return '본인';
@@ -56,6 +60,15 @@ export function lookupTitle(
   }
 
   if (ascent === 1 && descent === 1) {
+    if (inLawType === 'double') {
+      // 배우자 형제자매의 배우자 (장유는 그 형제자매와 내 배우자를 비교)
+      if (speakerGender === 'M') {
+        if (targetGender === 'M') return seniority === 'elder' ? '동서(형님)' : '동서';
+        return '처남댁';
+      }
+      if (targetGender === 'F') return seniority === 'elder' ? '형님(동서)' : '동서';
+      return seniority === 'elder' ? '아주버님(시누이 남편)' : seniority === 'younger' ? '서방님(시누이 남편)' : '시누이 남편';
+    }
     if (inLawType === 'spouse-side') {
       // 배우자의 형제자매
       if (speakerGender === 'M') {
@@ -89,6 +102,17 @@ export function lookupTitle(
 
   // === 3촌: 삼촌/이모/조카 ===
   if (ascent === 2 && descent === 1) {
+    const spousePrefix = speakerGender === 'M' ? '처' : '시';
+    if (inLawType === 'spouse-side') {
+      // 배우자의 삼촌/고모/외삼촌/이모
+      if (lineage === 'paternal') return targetGender === 'M' ? `${spousePrefix}삼촌` : `${spousePrefix}고모`;
+      return targetGender === 'M' ? `${spousePrefix}외삼촌` : `${spousePrefix}이모`;
+    }
+    if (inLawType === 'double') {
+      // 배우자의 삼촌/고모/외삼촌/이모의 배우자
+      if (lineage === 'paternal') return targetGender === 'F' ? `${spousePrefix}숙모` : `${spousePrefix}고모부`;
+      return targetGender === 'F' ? `${spousePrefix}외숙모` : `${spousePrefix}이모부`;
+    }
     if (inLawType === 'blood-side') {
       // 삼촌/고모의 배우자
       if (lineage === 'paternal') {
@@ -131,10 +155,29 @@ export function lookupTitle(
   }
 
   if (ascent === 3 && descent === 1) {
-    if (targetGender === 'M') {
-      return seniority === 'elder' ? '큰할아버지' : seniority === 'younger' ? '작은할아버지' : '종조부';
+    // 할아버지·할머니의 형제자매 (peerGender = 그 조부모의 성별, 모르면 할아버지 쪽으로 간주)
+    const grandpaSide = peerGender !== 'F';
+    if (inLawType === 'blood-side') {
+      // 그 형제자매의 배우자
+      if (lineage === 'maternal') {
+        if (targetGender === 'F') return '외종조모';
+        return grandpaSide ? '외대고모부' : '이모할아버지';
+      }
+      if (grandpaSide) {
+        if (targetGender === 'F') return seniority === 'elder' ? '큰할머니' : seniority === 'younger' ? '작은할머니' : '종조모';
+        return '고모할아버지';
+      }
+      return targetGender === 'F' ? '진외종조모' : '이모할아버지';
     }
-    return seniority === 'elder' ? '큰할머니' : seniority === 'younger' ? '작은할머니' : '종조모';
+    if (lineage === 'maternal') {
+      if (targetGender === 'M') return '외종조부';
+      return grandpaSide ? '외대고모' : '이모할머니';
+    }
+    if (grandpaSide) {
+      if (targetGender === 'M') return seniority === 'elder' ? '큰할아버지' : seniority === 'younger' ? '작은할아버지' : '종조부';
+      return '고모할머니';
+    }
+    return targetGender === 'M' ? '진외종조부' : '이모할머니';
   }
   if (ascent === 1 && descent === 3) return targetGender === 'M' ? '종조카' : '종조카딸';
 

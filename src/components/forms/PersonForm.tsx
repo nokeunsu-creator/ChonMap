@@ -4,6 +4,7 @@ import { Gender, EdgeType } from '../../models/types';
 import { nanoid } from 'nanoid';
 import { showToast } from '../../utils/toast';
 import { fireInterstitialAd, incrementSaveCount } from '../ads/InterstitialAd';
+import { MAX_PERSONS } from '../../storage/StorageService';
 
 type RelationType = 'father' | 'mother' | 'son' | 'daughter' | 'spouse' | 'brother' | 'sister';
 
@@ -63,6 +64,10 @@ export function PersonForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !targetPerson || birthYearError || deathYearError || birthMDError || deathMDError) return;
+    if (Object.keys(state.graph.persons).length >= MAX_PERSONS) {
+      showToast(`가족은 최대 ${MAX_PERSONS}명까지 추가할 수 있습니다`, 'error');
+      return;
+    }
 
     const newId = nanoid();
     const newPerson = {
@@ -92,7 +97,7 @@ export function PersonForm() {
     const edge = createEdge(newId, targetPersonId, relation);
     if (!edge) return;
 
-    dispatch({ type: 'ADD_PERSON', person: newPerson, edge });
+    dispatch({ type: 'ADD_PERSON', person: newPerson, edge, extraEdges: createExtraParentEdges(newId, targetPersonId, relation) });
     dispatch({ type: 'SELECT_PERSON', personId: null });
     if (incrementSaveCount()) fireInterstitialAd('가족을 추가했어요!');
     resetForm();
@@ -146,6 +151,27 @@ export function PersonForm() {
       default:
         return null;
     }
+  };
+
+  // 자녀는 배우자에게도, 형제자매는 모든 부모에게 연결한다.
+  // 한쪽 부모에만 연결되면 호칭 계산이 어긋나고, 그 부모를 삭제할 때 자녀 트리까지 함께 지워진다.
+  const createExtraParentEdges = (newId: string, targetId: string, rel: RelationType) => {
+    if (rel === 'son' || rel === 'daughter') {
+      const spouseEdge = state.graph.edges.find(
+        e => e.type === 'SPOUSE_OF' && (e.from === targetId || e.to === targetId)
+      );
+      if (!spouseEdge) return [];
+      const spouseId = spouseEdge.from === targetId ? spouseEdge.to : spouseEdge.from;
+      return [{ id: nanoid(), type: 'PARENT_OF' as EdgeType, from: spouseId, to: newId }];
+    }
+    if (rel === 'brother' || rel === 'sister') {
+      // createEdge가 첫 번째 부모를 연결하므로 나머지 부모만 추가
+      return state.graph.edges
+        .filter(e => e.type === 'PARENT_OF' && e.to === targetId)
+        .slice(1)
+        .map(e => ({ id: nanoid(), type: 'PARENT_OF' as EdgeType, from: e.from, to: newId }));
+    }
+    return [];
   };
 
   const resetForm = () => {

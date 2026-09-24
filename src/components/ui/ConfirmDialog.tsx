@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAndroidBack } from '../../utils/useAndroidBack';
 
 interface Props {
   message: string;
@@ -14,6 +15,9 @@ export function ConfirmDialog({ message, onConfirm, onCancel, confirmLabel = '�
   const textPrimary = dark ? '#F3F4F6' : '#3D2B1F';
   const textSecondary = dark ? '#9CA3AF' : '#6B7280';
   const cancelBg = dark ? '#374151' : '#F3F4F6';
+
+  // 안드로이드 뒤로가기 = 취소 (TWA에서 앱이 바로 종료되지 않도록)
+  useAndroidBack(true, onCancel);
 
   return (
     <div

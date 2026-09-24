@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useFamily } from '../../state/FamilyContext';
+import { useFamily, collectRemovalIds } from '../../state/FamilyContext';
 import { Gender } from '../../models/types';
 import { compressImage } from '../../utils/imageUtils';
 import { showToast } from '../../utils/toast';
@@ -92,11 +92,15 @@ export function EditForm() {
       showToast('기준 인물(나)은 삭제할 수 없습니다', 'error');
       return;
     }
+    // 다른 부모가 없는 자녀와 그 후손도 함께 삭제되므로 인원을 미리 알린다
+    const alsoRemoved = collectRemovalIds(state.graph, personId).size - 1;
     const hasChildren = state.graph.edges.some(e => e.type === 'PARENT_OF' && e.from === personId);
     setDeleteMsg(
-      hasChildren
-        ? `${person.name}을(를) 삭제하면 자녀와의 연결도 끊어집니다.\n삭제하시겠습니까?`
-        : `${person.name}을(를) 삭제하시겠습니까?`
+      alsoRemoved > 0
+        ? `${person.name}을(를) 삭제하면 연결된 자녀·후손 ${alsoRemoved}명도 함께 삭제됩니다.\n삭제하시겠습니까? (실행 취소로 되돌릴 수 있어요)`
+        : hasChildren
+          ? `${person.name}을(를) 삭제하면 자녀와의 연결도 끊어집니다.\n삭제하시겠습니까?`
+          : `${person.name}을(를) 삭제하시겠습니까?`
     );
     setConfirmDelete(true);
   };

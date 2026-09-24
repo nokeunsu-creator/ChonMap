@@ -1,13 +1,34 @@
 import { FamilyGraph } from '../models/types';
+import { showToast } from '../utils/toast';
 
 const STORAGE_KEY = 'chonmap_family_v1';
 const DARK_MODE_KEY = 'chonmap_darkmode';
 const PHOTOS_KEY = 'chonmap_photos_v1';
 const NOTIFICATION_KEY = 'chonmap_notifications';
 const MAX_CLIPBOARD_SIZE = 1024 * 1024; // 1MB
-const MAX_PERSONS = 500;
+// 저장/불러오기 검증 상한. 추가 UI(PersonForm)도 같은 값으로 막아 검증 실패로 데이터가 사라지지 않게 함
+export const MAX_PERSONS = 2000;
+// 검증에 실패한 저장본을 기본 그래프로 덮어쓰기 전에 보관하는 키
+const RECOVERY_KEY = 'chonmap_family_v1_recovery';
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+// 데이터 초기화 후 reload 전까지 저장 차단 (beforeunload flush가 지운 데이터를 되살리지 않도록)
+let saveDisabled = false;
+let quotaWarned = false;
+
+function writeGraph(graph: FamilyGraph): void {
+  if (saveDisabled) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(graph));
+    quotaWarned = false;
+  } catch (e) {
+    console.warn('가계도 저장 실패 (저장 공간 부족 가능):', e);
+    if (!quotaWarned) {
+      quotaWarned = true;
+      showToast('저장 공간이 부족해 저장하지 못했습니다. 사진을 줄이거나 백업해 주세요', 'error', 5000);
+    }
+  }
+}
 
 // 그래프 무결성 검증
 export function validateGraph(graph: FamilyGraph): boolean {
@@ -63,13 +84,18 @@ export function validateGraph(graph: FamilyGraph): boolean {
 
 export function saveGraph(graph: FamilyGraph): void {
   if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(graph));
-  }, 300);
+  saveTimer = setTimeout(() => writeGraph(graph), 300);
 }
 
 export function saveGraphImmediate(graph: FamilyGraph): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(graph));
+  writeGraph(graph);
+}
+
+// 읽을 수 없는 저장본은 버리지 않고 복구용 키에 남긴다 (이미 보관본이 있으면 유지)
+function preserveUnreadable(data: string): void {
+  try {
+    if (!localStorage.getItem(RECOVERY_KEY)) localStorage.setItem(RECOVERY_KEY, data);
+  } catch { /* 공간 부족 시 무시 */ }
 }
 
 export function loadGraph(): FamilyGraph | null {
@@ -77,9 +103,10 @@ export function loadGraph(): FamilyGraph | null {
   if (!data) return null;
   try {
     const graph = JSON.parse(data) as FamilyGraph;
-    if (!validateGraph(graph)) return null;
+    if (!validateGraph(graph)) { preserveUnreadable(data); return null; }
     return graph;
   } catch {
+    preserveUnreadable(data);
     return null;
   }
 }
@@ -167,7 +194,9 @@ export function getStorageUsageKB(): number {
 
 export function clearAllData(): void {
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  saveDisabled = true;
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(RECOVERY_KEY);
   localStorage.removeItem(DARK_MODE_KEY);
   localStorage.removeItem(PHOTOS_KEY);
 }

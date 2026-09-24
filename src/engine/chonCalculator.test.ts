@@ -606,7 +606,7 @@ describe('사돈 호칭', () => {
     // spouseAfterBlood=true이므로 isMidSpouse가 아님 → 사돈이 아님
     const r = calculateRelationship(deepInLawGraph, 'me', 'wifeBroWife');
     expect(r!.title).not.toBe('사돈');
-    // 현재는 처형/처제로 나오는 알려진 한계 (pre-existing)
+    expect(r!.title).toBe('처남댁'); // 배우자 쪽 혈족의 배우자 (inLawType 'double')
   });
 
   it('사위 (딸의 남편)', () => {

@@ -17,6 +17,7 @@ import { RatingDialog, getRatingState, setRatingNever, setRatingLater, increment
 import { BirthdayBanner } from './components/notifications/BirthdayBanner';
 import { getBirthdayPersons, formatBirthdayMessage } from './utils/birthdayUtils';
 import { getNotificationSettings, setNotificationSettings } from './storage/StorageService';
+import { useAndroidBack } from './utils/useAndroidBack';
 
 export default function App() {
   const { state, dispatch } = useFamily();
@@ -110,6 +111,17 @@ export default function App() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [editingPersonId, showAddForm, selectedPersonId, showSearch, activeTab, dispatch]);
+
+  // 안드로이드 뒤로가기 (TWA): 앱을 바로 종료하지 않고 열린 화면을 한 단계씩 닫음
+  // 나중에 열린 화면이 먼저 닫힌다 (탭 → 검색 → 추가/수정 폼 → 평가 창 순으로 쌓임)
+  useAndroidBack(activeTab !== 'tree', () => dispatch({ type: 'SET_TAB', tab: 'tree' }));
+  useAndroidBack(showSearch, () => setShowSearch(false));
+  useAndroidBack(showAddForm, () => {
+    dispatch({ type: 'SHOW_ADD_FORM', show: false });
+    dispatch({ type: 'SELECT_PERSON', personId: null });
+  });
+  useAndroidBack(!!editingPersonId, () => dispatch({ type: 'SET_EDITING', personId: null }));
+  useAndroidBack(showRating, () => { setShowRating(false); setRatingLater(); });
 
   useEffect(() => {
     if (selectedPersonId && !graph.persons[selectedPersonId]) {

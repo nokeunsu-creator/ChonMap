@@ -72,7 +72,21 @@ function bfs01(adj: Map<string, AdjEntry[]>, fromId: string, toId: string): BFSN
 }
 
 // 인척 유형: 'none' | 'spouse-side' (배우자 쪽 가족) | 'blood-side' (혈족의 배우자)
-export type InLawType = 'none' | 'spouse-side' | 'blood-side';
+// | 'double' (배우자 쪽 혈족의 배우자 — 동서, 처남댁 등)
+export type InLawType = 'none' | 'spouse-side' | 'blood-side' | 'double';
+
+type Step = 'up' | 'down' | 'spouse' | 'start';
+
+// 부부 간선이 경유일 뿐인지 판정 (인척 관계를 만들지 않음)
+// - up→spouse→up: 아버지를 거쳐 어머니의 부모로 (외가 조상)
+// - up→spouse→down: 부모 한쪽에만 연결된 형제·삼촌 (한쪽 부모만 등록된 자녀)
+// - down→spouse→down: 며느리/사위에게만 연결된 손주
+// down→spouse→up (사돈)은 경유가 아님
+function isPassThroughSpouse(prev: Step | null, next: Step | null): boolean {
+  if (prev === 'up') return next === 'up' || next === 'down';
+  if (prev === 'down') return next === 'down';
+  return false;
+}
 
 interface PathAnalysis {
   ascent: number;
@@ -82,6 +96,7 @@ interface PathAnalysis {
   inLawType: InLawType;
   maternalDescent: boolean; // 하강 경로에 여성 부모를 통해 내려감 (외손)
   bloodRelativeForSeniority: string | null; // 인척 장유 판단용 혈족 ID
+  spouseRefId: string | null; // 배우자 쪽 가족일 때 장유 비교 기준 (화자 대신 배우자)
   peerAncestorId: string | null; // 대상과 같은 세대의 나의 직계 조상 (장유 비교용)
   isMidSpouse: boolean; // 혈족의 배우자의 혈족 (사돈 패턴): 중간 배우자 이후 추가 이동
   inLawFamilyDepth: number; // 중간 배우자 이후 이동 단계 수
@@ -103,8 +118,6 @@ function analyzePath(path: BFSNode[], graph: FamilyGraph): PathAnalysis {
 
   // 경로에서 배우자 간선 위치 파악
   const steps = path.slice(1).map(n => n.direction);
-  const firstNonSpouse = steps.findIndex(s => s !== 'spouse');
-  const lastNonSpouse = steps.length - 1 - [...steps].reverse().findIndex(s => s !== 'spouse');
 
   if (steps.includes('spouse')) {
     hasSpouseEdge = true;
@@ -129,7 +142,7 @@ function analyzePath(path: BFSNode[], graph: FamilyGraph): PathAnalysis {
           for (let j = si - 1; j >= 0; j--) { if (steps[j] !== 'spouse') { prev = steps[j]; break; } }
           let next: string | null = null;
           for (let j = si + 1; j < steps.length; j++) { if (steps[j] !== 'spouse') { next = steps[j]; break; } }
-          if (!(prev === 'up' && next === 'up')) { allPassThrough = false; break; }
+          if (!isPassThroughSpouse(prev as Step | null, next as Step | null)) { allPassThrough = false; break; }
         }
       }
       if (allPassThrough) hasSpouseEdge = false;
@@ -151,7 +164,7 @@ function analyzePath(path: BFSNode[], graph: FamilyGraph): PathAnalysis {
         for (let j = si + 1; j < steps.length; j++) { if (steps[j] !== 'spouse') { nextStep = steps[j]; break; } }
         // 사돈: 배우자를 통해 그쪽 가족의 윗 세대로 올라가는 패턴 (nextStep='up')
         // nextStep='down'이면 배우자의 자녀 등 다른 관계 → 사돈 아님
-        if (nextStep === 'up' && !(prevStep === 'up' && nextStep === 'up')) {
+        if (nextStep === 'up' && !isPassThroughSpouse(prevStep as Step | null, nextStep)) {
           isMidSpouse = true;
           midSpouseStepIdx = si;
           for (let j = si + 1; j < steps.length; j++) {
@@ -226,11 +239,14 @@ function analyzePath(path: BFSNode[], graph: FamilyGraph): PathAnalysis {
   if (hasSpouseEdge) {
     if (spouseBeforeBlood && !spouseAfterBlood) inLawType = 'spouse-side';
     else if (spouseAfterBlood && !spouseBeforeBlood) inLawType = 'blood-side';
-    else if (spouseBeforeBlood && spouseAfterBlood) inLawType = 'spouse-side'; // 양쪽 다
+    else if (spouseBeforeBlood && spouseAfterBlood) inLawType = 'double'; // 배우자 쪽 혈족의 배우자
     else inLawType = 'blood-side'; // 중간에 있으면 혈족의 배우자
   }
 
-  return { ascent, descent, lineage, isInLaw: hasSpouseEdge, inLawType, maternalDescent, bloodRelativeForSeniority, peerAncestorId, isMidSpouse, inLawFamilyDepth };
+  // 배우자 쪽 가족의 장유는 화자가 아니라 배우자 기준 (처형/처제, 시숙/도련님)
+  const spouseRefId = spouseBeforeBlood && path.length >= 2 ? path[1].id : null;
+
+  return { ascent, descent, lineage, isInLaw: hasSpouseEdge, inLawType, maternalDescent, bloodRelativeForSeniority, spouseRefId, peerAncestorId, isMidSpouse, inLawFamilyDepth };
 }
 
 function determineSeniority(
@@ -241,6 +257,7 @@ function determineSeniority(
   graph: FamilyGraph,
   bloodRelativeId: string | null,
   peerAncestorId: string | null,
+  spouseRefId: string | null = null,
 ): 'elder' | 'younger' | 'unknown' {
   // 인척이면 혈족 기준으로 판단 (예: 형수 → 형의 나이로 판단)
   const target = bloodRelativeId ? graph.persons[bloodRelativeId] : to;
@@ -260,9 +277,11 @@ function determineSeniority(
   }
 
   // ascent === descent (형제/사촌 등): 대상과 나 비교
-  if (from.birthYear && target.birthYear) {
-    return target.birthYear < from.birthYear ? 'elder'
-         : target.birthYear > from.birthYear ? 'younger'
+  // 배우자 쪽 가족이면 나 대신 배우자와 비교 (아내의 언니 = 처형)
+  const ref = (spouseRefId && graph.persons[spouseRefId]) || from;
+  if (ref.birthYear && target.birthYear) {
+    return target.birthYear < ref.birthYear ? 'elder'
+         : target.birthYear > ref.birthYear ? 'younger'
          : 'unknown';
   }
   return 'unknown';
@@ -307,7 +326,7 @@ export function calculateRelationship(
   if (!from || !to) return null;
 
   const analysis = analyzePath(pathNodes, graph);
-  const { ascent, descent, lineage, isInLaw, inLawType, maternalDescent, bloodRelativeForSeniority, peerAncestorId, isMidSpouse, inLawFamilyDepth } = analysis;
+  const { ascent, descent, lineage, isInLaw, inLawType, maternalDescent, bloodRelativeForSeniority, spouseRefId, peerAncestorId, isMidSpouse, inLawFamilyDepth } = analysis;
 
   // 사돈 패턴: 혈족의 배우자의 가족 (예: 나의 형제의 배우자의 부모)
   if (isMidSpouse) {
@@ -321,9 +340,10 @@ export function calculateRelationship(
   }
 
   const chon = ascent + descent;
-  const seniority = determineSeniority(from, to, ascent, descent, graph, bloodRelativeForSeniority, peerAncestorId);
+  const seniority = determineSeniority(from, to, ascent, descent, graph, bloodRelativeForSeniority, peerAncestorId, spouseRefId);
+  const peerGender = peerAncestorId ? graph.persons[peerAncestorId]?.gender : undefined;
 
-  const title = lookupTitle(ascent, descent, lineage, to.gender, from.gender, isInLaw, inLawType, seniority, maternalDescent);
+  const title = lookupTitle(ascent, descent, lineage, to.gender, from.gender, isInLaw, inLawType, seniority, maternalDescent, peerGender);
 
   return { chon, path: pathNodes.map(n => n.id), title, lineage, isInLaw };
 }
@@ -389,6 +409,9 @@ function reconstructPaths(
 ): BFSNode[][] {
   const results: BFSNode[][] = [];
 
+  // 부부 간선(가중치 0) 때문에 같은 거리의 두 사람이 서로를 선행 노드로 가질 수 있음
+  // → 현재 경로에 이미 있는 사람은 다시 방문하지 않아 순환 경로를 막는다
+  const onPath = new Set<string>();
   function backtrack(currentId: string, path: BFSNode[]) {
     if (results.length >= maxPaths) return;
     if (currentId === fromId) {
@@ -397,12 +420,15 @@ function reconstructPaths(
     }
     const node = info.get(currentId);
     if (!node) return;
+    onPath.add(currentId);
     for (const pred of node.preds) {
+      if (onPath.has(pred.prevId)) continue;
       backtrack(pred.prevId, [
         { id: currentId, dist: node.dist, prev: pred.prevId, direction: pred.direction },
         ...path,
       ]);
     }
+    onPath.delete(currentId);
   }
 
   backtrack(toId, []);
@@ -445,9 +471,10 @@ export function findAlternativePaths(
     if (results.length >= maxPaths) break;
 
     const analysis = analyzePath(pathNodes, graph);
-    const { ascent, descent, lineage, isInLaw, inLawType, maternalDescent, bloodRelativeForSeniority, peerAncestorId, isMidSpouse, inLawFamilyDepth } = analysis;
+    const { ascent, descent, lineage, isInLaw, inLawType, maternalDescent, bloodRelativeForSeniority, spouseRefId, peerAncestorId, isMidSpouse, inLawFamilyDepth } = analysis;
     const chon = isMidSpouse ? ascent + descent + inLawFamilyDepth : ascent + descent;
-    const seniority = determineSeniority(from, to, ascent, descent, graph, bloodRelativeForSeniority, peerAncestorId);
+    const seniority = determineSeniority(from, to, ascent, descent, graph, bloodRelativeForSeniority, peerAncestorId, spouseRefId);
+    const peerGender = peerAncestorId ? graph.persons[peerAncestorId]?.gender : undefined;
 
     // 배우자 특수 처리: chon=0이고 직접 배우자면 호칭 직접 지정
     let title: string;
@@ -456,7 +483,7 @@ export function findAlternativePaths(
     } else if (chon === 0 && spouseId === toId && pathNodes.length === 2) {
       title = from.gender === 'M' ? '아내' : '남편';
     } else {
-      title = lookupTitle(ascent, descent, lineage, to.gender, from.gender, isInLaw, inLawType, seniority, maternalDescent);
+      title = lookupTitle(ascent, descent, lineage, to.gender, from.gender, isInLaw, inLawType, seniority, maternalDescent, peerGender);
     }
     const pathIds = pathNodes.map(n => n.id);
 

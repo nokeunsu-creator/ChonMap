@@ -639,7 +639,7 @@ export function Baduk({ onBack }: GameProps) {
     if (mode === 'local' && size === null) { setMode(null); return; }
     setMode(null);
   };
-  useAndroidBack(mode !== null, smartBack);
+  useAndroidBack(mode !== null, smartBack, `${mode}|${size}|${aiLevel}`);
 
   // 테마 색
   const goldColor = dark ? '#FBBF24' : '#8B6914';

@@ -30,7 +30,15 @@
 ### 촌수 계산 엔진 (`src/engine/`)
 - **0-1 BFS 알고리즘** (`chonCalculator.ts`): 배우자 간선 가중치=0, 부모-자녀 간선 가중치=1
 - **경로 분석**: ascent(상승) + descent(하강) = 촌수, lineage(부계/모계), inLawType(spouse-side/blood-side)
-- **경유 배우자 감지**: BFS가 `어머니→[spouse]아버지→할아버지` 처럼 부부 간 경유(up→spouse→up)할 때 pass-through로 인식. lineage와 peerAncestor도 경유 보정 적용
+- **경유 배우자 감지** (`isPassThroughSpouse`): 부부 간선이 경유일 뿐인 패턴은 인척으로 보지 않음
+  - up→spouse→up: `어머니→[spouse]아버지→할아버지` (lineage·peerAncestor도 경유 보정)
+  - up→spouse→down: 부모 한쪽에만 연결된 형제·삼촌·고모 (2026-09 추가 — 이전엔 형제가 '제수씨', 고모가 '숙모'로 나왔음)
+  - down→spouse→down: 며느리/사위에게만 연결된 손주
+  - down→spouse→up은 경유가 아님 → 사돈
+- **InLawType `double`**: 첫 이동과 마지막 이동이 모두 배우자 = 배우자 쪽 혈족의 배우자. 1-1은 동서/처남댁/형님/서방님, 2-1은 처숙모·시고모부 등. 그 외 촌수는 spouse-side로 취급
+- **배우자 쪽 장유는 배우자 기준** (`spouseRefId`): 처형/처제, 시숙/도련님, 동서(형님)는 화자가 아니라 배우자의 출생년도와 비교
+- **3-1(종조부 항렬)은 `peerGender`로 구분**: 할아버지 형제=큰/작은할아버지, 할아버지 누이=고모할머니(남편 고모할아버지), 할머니 자매=이모할머니, 할머니 형제=진외종조부, 외가는 외종조부/외대고모
+- **다른 경로 보기** (`reconstructPaths`): 부부 간선(가중치 0) 때문에 두 사람이 서로의 선행 노드가 되므로 경로 위 사람은 재방문 금지 (순환 경로 방지)
 - **장유 판단**: ascent>descent일 때 `peerAncestorId`(동세대 직계 조상)와 대상의 출생년도 비교 (큰아버지/작은아버지 구분)
 - **호칭 룩업** (`kinshipTitles.ts`): if-else 기반으로 (ascent, descent, lineage, 성별, 화자성별, inLawType, 장유) → 한국식 호칭 반환
 - 인척 구분: `spouse-side` = 배우자 쪽 가족 (장인, 처남), `blood-side` = 혈족의 배우자 (형수, 매형)
@@ -78,13 +86,14 @@ src/
 ├── models/types.ts              # 데이터 모델 (childOrder 포함)
 ├── engine/
 │   ├── chonCalculator.ts        # 0-1 BFS + 경로 분석 + 경유배우자 감지 + 관계 계산
-│   ├── chonCalculator.test.ts   # 촌수/호칭 테스트 (13건)
+│   ├── chonCalculator.test.ts   # 촌수/호칭 테스트
+│   ├── chonCalculator.regression.test.ts # 2026-09 리뷰 버그 회귀 테스트 (한쪽 부모 연결, 동서, 종조부, 순환 경로)
 │   └── kinshipTitles.ts         # 한국식 호칭 룩업 (if-else 기반)
 ├── state/
 │   └── FamilyContext.tsx         # Context + useReducer + Undo/Redo + REORDER_CHILD + SORT_CHILDREN_BY_AGE
 ├── storage/
 │   ├── StorageService.ts        # localStorage CRUD, JSON 내보내기/가져오기, 디바운스 저장
-│   ├── StorageService.test.ts   # 저장소 테스트 (11건)
+│   ├── StorageService.test.ts   # 저장소 테스트 (검증·복구 보관·초기화 후 저장 차단)
 │   └── templates.ts             # 가족 템플릿 (핵가족, 3대, 양가)
 ├── utils/
 │   └── imageUtils.ts            # 이미지 압축 유틸
@@ -170,7 +179,7 @@ src/
 npm run dev       # 개발 서버
 npm run build     # 프로덕션 빌드 (tsc + vite build)
 npm run preview   # 빌드 결과 미리보기
-npm run test      # Vitest 테스트 (24건)
+npm run test      # Vitest 테스트 (97건)
 ```
 
 ## 배포
@@ -186,10 +195,20 @@ npx vercel --prod --yes
 - Store listing 작성 완료 (`store-listing.md`)
 
 ## 미완료
-- Google Play Store 심사 통과 대기 → 결과에 따라 추가 조치 필요
-- 인앱상품 등록 (chonmap_premium_unlock, ₩1,000) — Play Console에서 설정 필요
+- Google Play Store 2회 거절 (2026-09 기준) → v1.2.1(versionCode 8) AAB 재제출 준비 완료. 거절 사유 원문 확인 필요
+- **assetlinks.json에 Play 앱 서명 키 SHA-256 추가 필요**: 현재는 업로드 키(E2:72:…)만 등록. Play App Signing 사용 시 스토어 설치본은 Google 키로 서명되므로
+  이 지문이 없으면 TWA 검증 실패 → 주소창 노출(웹뷰 스팸/최소 기능 거절 사유). Play Console → 테스트 및 출시 → 앱 무결성 → 앱 서명 키 인증서 SHA-256
+- 인앱상품 등록 (chonmap_premium_unlock, ₩1,000) — 현재 앱 내 결제 코드 없음 (Digital Goods API 미구현). 구현 전에는 등록 불필요
 - **AdSense 재검토 요청 필요**: `/`를 정적 랜딩으로, `/app/`을 SPA로 분리한 후 AdSense 콘솔에서 "검토 요청" 클릭 (chonmap.vercel.app 정책 위반 해소)
-- **TWA APK 재빌드 필요**: `manifest.json` `start_url`이 `/app/`로 변경됨. bubblewrap으로 APK 재빌드 → 새 AAB로 Play Console 업로드 필요
+
+## Android 릴리스 빌드 (2026-09-25 변경)
+- **targetSdk 36 필수**: Google Play는 2026-08-31부터 신규 앱·업데이트에 API 36 요구. `android/app/build.gradle`에서 직접 36으로 올림
+- **`bubblewrap build`/`bubblewrap update` 쓰지 말 것**: bubblewrap 1.24.1 템플릿은 targetSdk 35라 프로젝트를 재생성하면 36이 35로 되돌아간다.
+  `twa-manifest.json`을 고치면 `manifest-checksum.txt`(= twa-manifest.json의 SHA-1)도 갱신해야 재생성 프롬프트가 안 뜬다
+- 빌드: `JAVA_HOME=C:\jdk21`, `ANDROID_HOME=C:\Users\nokeu\.bubblewrap` → `android\gradlew.bat bundleRelease assembleRelease`
+- 서명: `jarsigner`(AAB) / `zipalign`+`apksigner`(APK, build-tools 35.0.0), 키는 `android/keystore.properties` (git 제외)
+- 버전 올릴 때 `app/build.gradle`(versionCode/versionName)과 `twa-manifest.json`(appVersionCode/appVersionName/appVersion) 둘 다 수정
+- 산출물 `android/app-release-bundle.aab`는 git 제외 (`.gitignore`)
 
 ## 주의사항
 - `kinshipTitles.ts`는 if-else 기반. 새 호칭 추가 시 ascent/descent 조합 확인
@@ -197,14 +216,20 @@ npx vercel --prod --yes
 - 배우자는 1인만 허용 (PersonForm에서 검증)
 - 부모는 2인까지만 허용
 - 루트 인물(나)은 삭제 불가 (리듀서에서 차단)
-- 부모 삭제 시 고아 자녀 재귀 삭제됨 (다른 부모 없는 경우만)
+- 부모 삭제 시 고아 자녀 재귀 삭제됨 (다른 부모 없는 경우만). `collectRemovalIds()`로 범위를 계산하고 EditForm 확인창에 함께 삭제될 인원을 표시
+- **자녀·형제 추가 시 부모 양쪽 연결** (PersonForm `createExtraParentEdges`): 자녀는 대상의 배우자에게도, 형제자매는 대상의 모든 부모에게 PARENT_OF 추가
+- **REMOVE_PERSON은 사진을 지우지 않음**: UNDO가 그래프만 되돌리므로 사진 영구 손실 방지. 가계도에 없는 사람의 사진은 앱 시작 시 `pruneOrphanPhotos`로 정리
+- **저장 보호** (StorageService): `MAX_PERSONS=2000`(PersonForm도 같은 값으로 차단), 검증 실패한 저장본은 `chonmap_family_v1_recovery`에 보관, 저장 실패 시 토스트, `clearAllData()` 후엔 `saveDisabled`로 beforeunload flush 차단
+- **안드로이드 뒤로가기** (`useAndroidBack`): App(탭·검색·추가/수정 폼·평가창), ConfirmDialog(취소), PlayHub, 각 게임에서 등록. 하위 단계만 바뀌는 화면은 3번째 인자 `key`로 재등록(바둑).
+  조용한 되돌리기는 카운터+`history.go(-n)` 일괄 처리, 페이지 이탈 중(`beforeunload`)에는 호출 안 함 — 안 그러면 데이터 초기화의 reload가 취소됨
 - localStorage 5MB 제한 (가족 200명 ≈ 50KB, 충분)
 - 사진 data URL 500KB 제한 + 화이트리스트 검증 (`isSafePhotoDataUrl`: `data:image/(jpeg|png|webp);base64,...`만 허용). `loadPhotos`/`SET_PHOTO` 양쪽에서 검증
 - PersonForm은 인라인 스타일 + dk 변수로 다크모드, EditForm은 Tailwind + CSS 오버라이드
 - **드래그 stale closure**: endDrag는 useCallback([dispatch])만 의존. dragTargetOrder를 state가 아닌 `dragInfoRef.current.currentOrder`(ref)에서 읽어야 함
 - **레이아웃 루트 순서**: `findAncestorRoot()` 로 나의 직계 최상위 조상을 찾아 sortedRoots 첫 번째로 배치. 이 순서를 바꾸면 인척 트리 y 오프셋 계산이 틀어짐
 - **AdSense 라우팅 전략**: 광고 스크립트는 `/`(랜딩) + 정적 페이지(guide, about, chon/*)에만 삽입. SPA 셸(`/app/`)은 `noindex,follow`로 색인 회피하고 AdSense 스크립트도 제거됨 — SPA는 행동 화면이라 "콘텐츠 없는 화면" 정책 위반 사유였음. AD_SLOT은 AdSense 승인 후 채울 것
-- **TWA start_url 변경**: `manifest.json` `start_url`이 `/app/`이므로 bubblewrap 재빌드가 필요하다. 기존 APK는 `/` 진입 시 랜딩 페이지가 나타나서 사용자 경험 손상
+- **TWA start_url 변경**: `manifest.json` `start_url`이 `/app/`. versionCode 7부터 `launchUrl: '/app/'`로 재빌드 완료. versionCode 6 이하 APK는 `/` 진입 시 랜딩 페이지가 나타남
+- **평점 유도 문구**: RatingDialog에 "별점 5점" 같은 특정 점수 요구 금지 (Play 평점·리뷰 정책). 중립 문구만 사용
 - **CSP 정책**: `vercel.json`에서 `'unsafe-eval'` 제거 완료. `'unsafe-inline'`은 AdSense 인라인 호출(`(adsbygoogle = ...).push({})`) 때문에 유지. 후속 강화는 nonce 도입(Vercel Edge Middleware) 필요
 - **TwentyFour 평가기**: `new Function` 대신 Shunting-yard 기반 파서 사용 (`src/components/play/games/TwentyFour.tsx`). 정수/부동소수점, 단항 마이너스, 괄호 모두 지원. EPS=1e-6 비교로 부동소수점 오차 허용
 - **Service Worker 캐시 정책**: `sameOrigin && response.type === 'basic'`인 응답만 캐시. 외부(AdSense iframe 등) 응답은 캐시하지 않음. message 핸들러는 `event.origin === self.location.origin` 검증 + 입력 sanitize (배열 max 20개, 문자열 max 50자)

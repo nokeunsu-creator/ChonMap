@@ -26,7 +26,7 @@ export interface FamilyState {
 }
 
 type FamilyAction =
-  | { type: 'ADD_PERSON'; person: Person; edge: Edge }
+  | { type: 'ADD_PERSON'; person: Person; edge: Edge; extraEdges?: Edge[] }
   | { type: 'REMOVE_PERSON'; personId: string }
   | { type: 'UPDATE_PERSON'; personId: string; updates: Partial<Person> }
   | { type: 'SET_PERSPECTIVE'; personId: string }
@@ -55,6 +55,27 @@ function createDefaultGraph(): FamilyGraph {
   };
 }
 
+// 삭제 대상 + 고아가 될 자녀(다른 부모가 없는 자녀)와 그 하위 트리를 재귀적으로 수집
+export function collectRemovalIds(graph: FamilyGraph, personId: string): Set<string> {
+  const toRemove = new Set<string>();
+  function collectOrphans(pid: string) {
+    toRemove.add(pid);
+    const children = graph.edges
+      .filter(e => e.type === 'PARENT_OF' && e.from === pid)
+      .map(e => e.to);
+    for (const childId of children) {
+      if (childId === graph.rootPersonId || toRemove.has(childId)) continue;
+      // 다른 부모가 있으면 고아가 아님
+      const otherParent = graph.edges.some(
+        e => e.type === 'PARENT_OF' && e.to === childId && !toRemove.has(e.from)
+      );
+      if (!otherParent) collectOrphans(childId);
+    }
+  }
+  collectOrphans(personId);
+  return toRemove;
+}
+
 function recalc(graph: FamilyGraph, pid: string) {
   return calculateAllRelationships(graph, pid);
 }
@@ -72,7 +93,7 @@ function familyReducer(state: FamilyState, action: FamilyAction): FamilyState {
       const newGraph: FamilyGraph = {
         ...state.graph,
         persons: { ...state.graph.persons, [action.person.id]: action.person },
-        edges: [...state.graph.edges, action.edge],
+        edges: [...state.graph.edges, action.edge, ...(action.extraEdges || [])],
       };
       return {
         ...state, ...pushUndo(state),
@@ -83,30 +104,12 @@ function familyReducer(state: FamilyState, action: FamilyAction): FamilyState {
     }
     case 'REMOVE_PERSON': {
       if (action.personId === state.graph.rootPersonId) return state;
-      // 삭제 대상 + 고아가 될 자녀를 재귀적으로 수집
-      const toRemove = new Set<string>();
-      function collectOrphans(pid: string) {
-        toRemove.add(pid);
-        const children = state.graph.edges
-          .filter(e => e.type === 'PARENT_OF' && e.from === pid)
-          .map(e => e.to);
-        for (const childId of children) {
-          if (childId === state.graph.rootPersonId) continue;
-          // 다른 부모가 있으면 고아가 아님
-          const otherParent = state.graph.edges.some(
-            e => e.type === 'PARENT_OF' && e.to === childId && !toRemove.has(e.from)
-          );
-          if (!otherParent) collectOrphans(childId);
-        }
-      }
-      collectOrphans(action.personId);
+      const toRemove = collectRemovalIds(state.graph, action.personId);
 
+      // 사진은 지우지 않는다: 실행 취소(UNDO)는 그래프만 되돌리므로 여기서 지우면 사진이 영구 손실됨.
+      // 가계도에 없는 사람의 사진은 다음 실행 시 초기화 단계에서 정리된다.
       const remainingPersons = { ...state.graph.persons };
-      const remainingPhotos = { ...state.photos };
-      for (const id of toRemove) {
-        delete remainingPersons[id];
-        delete remainingPhotos[id];
-      }
+      for (const id of toRemove) delete remainingPersons[id];
       const remainingEdges = state.graph.edges.filter(
         e => !toRemove.has(e.from) && !toRemove.has(e.to)
       );
@@ -126,7 +129,6 @@ function familyReducer(state: FamilyState, action: FamilyAction): FamilyState {
         perspectivePersonId: newPerspective,
         selectedPersonId: null, editingPersonId: null,
         relationships: recalc(newGraph, newPerspective),
-        photos: remainingPhotos,
       };
     }
     case 'UPDATE_PERSON': {
@@ -291,7 +293,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       editingPersonId: null,
       undoStack: [],
       redoStack: [],
-      photos: loadPhotos(),
+      photos: pruneOrphanPhotos(loadPhotos(), initialGraph),
     };
   });
 
@@ -314,6 +316,12 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
       {children}
     </FamilyContext.Provider>
   );
+}
+
+function pruneOrphanPhotos(photos: Record<string, string>, graph: FamilyGraph): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [id, url] of Object.entries(photos)) if (graph.persons[id]) out[id] = url;
+  return out;
 }
 
 export function useFamily() {

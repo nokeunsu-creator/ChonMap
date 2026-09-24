@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateGraph } from './StorageService';
+import { validateGraph, MAX_PERSONS, loadGraph, saveGraphImmediate, clearAllData } from './StorageService';
 import { FamilyGraph } from '../models/types';
 
 describe('validateGraph', () => {
@@ -44,9 +44,9 @@ describe('validateGraph', () => {
     })).toBe(false);
   });
 
-  it('500명 초과하면 거부', () => {
+  it(`${MAX_PERSONS}명 초과하면 거부`, () => {
     const persons: Record<string, any> = {};
-    for (let i = 0; i <= 500; i++) {
+    for (let i = 0; i <= MAX_PERSONS; i++) {
       persons[`p${i}`] = { id: `p${i}`, name: `Person${i}`, gender: 'M' };
     }
     expect(validateGraph({
@@ -85,5 +85,42 @@ describe('validateGraph', () => {
       version: 1,
     };
     expect(validateGraph(graph)).toBe(true);
+  });
+});
+
+// localStorage 최소 스텁 (vitest node 환경)
+function stubLocalStorage() {
+  const m = new Map<string, string>();
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => (m.has(k) ? m.get(k)! : null),
+    setItem: (k: string, v: string) => { m.set(k, String(v)); },
+    removeItem: (k: string) => { m.delete(k); },
+    key: (i: number) => [...m.keys()][i] ?? null,
+    get length() { return m.size; },
+  };
+  return m;
+}
+
+describe('저장본 보호', () => {
+  const graph: FamilyGraph = {
+    persons: { me: { id: 'me', name: '나', gender: 'M' } },
+    edges: [], rootPersonId: 'me', version: 1,
+  };
+
+  it('검증에 실패한 저장본은 복구용 키에 보관된다', () => {
+    const m = stubLocalStorage();
+    const broken = JSON.stringify({ ...graph, rootPersonId: 'nobody' });
+    m.set('chonmap_family_v1', broken);
+    expect(loadGraph()).toBeNull();
+    expect(m.get('chonmap_family_v1_recovery')).toBe(broken);
+  });
+
+  it('데이터 초기화 후에는 beforeunload 즉시 저장이 데이터를 되살리지 않는다', () => {
+    const m = stubLocalStorage();
+    saveGraphImmediate(graph);
+    expect(m.has('chonmap_family_v1')).toBe(true);
+    clearAllData();
+    saveGraphImmediate(graph); // reload 직전 beforeunload flush
+    expect(m.has('chonmap_family_v1')).toBe(false);
   });
 });
