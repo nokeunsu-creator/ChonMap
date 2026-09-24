@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#5A4400",
   "backgroundColor": "#FDF6E3",
   "enableNotifications": false,
-  "startUrl": "/",
+  "startUrl": "/app/",
   "iconUrl": "https://chonmap.vercel.app/icons/icon-512.png",
   "maskableIconUrl": "https://chonmap.vercel.app/icons/icon-512.png",
   "monochromeIconUrl": "",
@@ -21,8 +21,8 @@
     "path": "chonmap-new.keystore",
     "alias": "chonmap"
   },
-  "appVersionName": "1.1.1",
-  "appVersionCode": 4,
+  "appVersionName": "1.2.1",
+  "appVersionCode": 8,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "fallbackType": "customtabs",
@@ -40,5 +40,5 @@
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "displayOverride": [],
-  "appVersion": "1.1.1"
+  "appVersion": "1.2.1"
 }

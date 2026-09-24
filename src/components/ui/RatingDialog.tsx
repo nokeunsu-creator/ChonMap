@@ -32,7 +32,7 @@ export function RatingDialog({ dark, onRate, onLater, onNever }: Props) {
           촌맵이 마음에 드셨나요?
         </div>
         <div style={{ fontSize: 13, color: textSecondary, marginBottom: 24, lineHeight: 1.6 }}>
-          별점 5점을 주시면 개발자에게<br/>큰 힘이 됩니다 🙏
+          솔직한 평가와 리뷰를 남겨주시면<br/>앱을 개선하는 데 큰 도움이 됩니다
         </div>
         <button onClick={onRate} style={{
           width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
