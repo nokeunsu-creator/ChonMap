@@ -369,7 +369,7 @@ export function SettingsPage() {
             화면 테마를 변경합니다
           </div>
         </div>
-        <button onClick={handleToggleDarkMode} style={{
+        <button onClick={handleToggleDarkMode} role="switch" aria-checked={dark} aria-label="다크 모드" style={{
           width: 50, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer',
           background: dark ? '#FBBF24' : '#D1D5DB', position: 'relative', transition: 'background 0.2s',
         }}>

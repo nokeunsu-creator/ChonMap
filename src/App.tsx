@@ -367,8 +367,8 @@ export default function App() {
         ))}
       </nav>
 
-      {/* FAB 스택: 수정 + 추가 */}
-      {activeTab === 'tree' && personCount > 1 && !showAddForm && !editingPersonId && (
+      {/* FAB 스택: 수정 + 추가 — '나'만 있을 때도 보여야 첫 가족을 추가할 수 있다 (빈 상태 안내가 + 버튼을 가리킴) */}
+      {activeTab === 'tree' && !showAddForm && !editingPersonId && (
         <>
           {/* 수정 FAB */}
           <button

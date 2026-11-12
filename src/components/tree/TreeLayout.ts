@@ -75,7 +75,9 @@ export function computeLayout(graph: FamilyGraph, collapsedIds?: Set<string>): L
     const myChildren = childOf.get(personId) || [];
     const spouseChildren = sp ? (childOf.get(sp) || []) : [];
     const rawChildIds = [...new Set([...myChildren, ...spouseChildren])];
-    const storedOrder = graph.childOrder?.[personId] ?? (sp ? graph.childOrder?.[sp] : undefined);
+    const rawStored = graph.childOrder?.[personId] ?? (sp ? graph.childOrder?.[sp] : undefined);
+    // 저장본이 조작돼 배열이 아니면 무시 (validateGraph도 막지만 렌더에서 한 번 더 방어)
+    const storedOrder = Array.isArray(rawStored) ? rawStored : undefined;
     const allChildIds = storedOrder
       ? [...storedOrder.filter(id => rawChildIds.includes(id)), ...rawChildIds.filter(id => !storedOrder.includes(id))]
       : rawChildIds;
@@ -96,21 +98,27 @@ export function computeLayout(graph: FamilyGraph, collapsedIds?: Set<string>): L
   // Uses depth-first search to find the root ancestor reachable via the LONGEST parent chain,
   // so that if 나 has parents on different branches (e.g. 아버지→할머니 vs 어머니 with no parents),
   // we always follow the deeper branch rather than stopping at a shallow root.
+  // Memoized per person: without the cache a lattice of shared ancestors (e.g. a grandparent also
+  // registered as a parent) makes the number of paths grow exponentially and freezes the app.
   const findAncestorRoot = (): string => {
-    const getDeepest = (id: string, seen: Set<string>): { root: string; depth: number } => {
-      if (seen.has(id)) return { root: id, depth: 0 };
-      const next = new Set(seen);
-      next.add(id);
+    const memo = new Map<string, { root: string; depth: number }>();
+    const onPath = new Set<string>();
+    const getDeepest = (id: string): { root: string; depth: number } => {
+      const cached = memo.get(id);
+      if (cached) return cached;
+      if (onPath.has(id)) return { root: id, depth: 0 }; // cycle guard
+      onPath.add(id);
       const parents = parentOf.get(id) || [];
-      if (parents.length === 0) return { root: id, depth: 0 };
       let best = { root: id, depth: 0 };
       for (const p of parents) {
-        const r = getDeepest(p, next);
+        const r = getDeepest(p);
         if (r.depth + 1 > best.depth) best = { root: r.root, depth: r.depth + 1 };
       }
+      onPath.delete(id);
+      memo.set(id, best);
       return best;
     };
-    return getDeepest(graph.rootPersonId, new Set()).root;
+    return getDeepest(graph.rootPersonId).root;
   };
 
   const roots = findRoots();

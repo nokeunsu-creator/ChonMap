@@ -179,8 +179,10 @@ src/
 npm run dev       # 개발 서버
 npm run build     # 프로덕션 빌드 (tsc + vite build)
 npm run preview   # 빌드 결과 미리보기
-npm run test      # Vitest 테스트 (97건)
+npm run test      # Vitest 테스트 (105건)
 ```
+- **의존성 설치는 `npx npm@11 install`**: Node 22 기본 npm 10.9.0은 vitest 4.1.12의 peer 집합을 풀다가 `Cannot read properties of null (reading 'edgesOut')`로 죽는다 (lockfile 삭제해도 동일). npm 11은 정상
+- **브라우저 E2E**: Playwright 스크립트(58 시나리오: 랜딩/정적 페이지, 가족 추가, 기준 변경, undo/redo, 관계 검색, 내보내기/가져오기(조작 JSON·XSS 페이로드), PDF 팝업 이스케이프, 다크모드, 이미지 저장, 놀이 탭, 영속성, 저장소 변조)는 저장소 밖(세션 스크래치)에 있음. `npx vite preview --port 4173` 띄우고 `BASE=http://localhost:4173 node e2e.cjs`. 저장소 변조 시나리오는 앱이 떠 있으면 beforeunload 저장이 덮어쓰므로 `/privacy.html`에서 localStorage를 바꾼 뒤 `/app/`으로 이동해야 한다
 
 ## 배포
 ```bash
@@ -193,6 +195,7 @@ npx vercel --prod --yes
 - `public/.well-known/assetlinks.json`에 실제 서명 키 SHA256 등록 완료
 - Google Play Console 등록 완료 (심사 대기 중)
 - Store listing 작성 완료 (`store-listing.md`)
+- **2026-11-12 전체 소스 검증·보안 점검**: tsc/Vitest 105건/빌드/npm audit 0건/E2E 58건 통과. 조작된 백업 JSON 거부 강화, '나'만 있을 때 + FAB 미표시 버그(2026-04-24 v1.1.1부터) 수정, ConfirmDialog role=dialog+ESC, 다크모드 스위치 aria
 
 ## 미완료
 - Google Play Store 2회 거절 (2026-09 기준) → v1.2.1(versionCode 8) AAB 재제출 준비 완료. 거절 사유 원문 확인 필요
@@ -220,6 +223,10 @@ npx vercel --prod --yes
 - **자녀·형제 추가 시 부모 양쪽 연결** (PersonForm `createExtraParentEdges`): 자녀는 대상의 배우자에게도, 형제자매는 대상의 모든 부모에게 PARENT_OF 추가
 - **REMOVE_PERSON은 사진을 지우지 않음**: UNDO가 그래프만 되돌리므로 사진 영구 손실 방지. 가계도에 없는 사람의 사진은 앱 시작 시 `pruneOrphanPhotos`로 정리
 - **저장 보호** (StorageService): `MAX_PERSONS=2000`(PersonForm도 같은 값으로 차단), 검증 실패한 저장본은 `chonmap_family_v1_recovery`에 보관, 저장 실패 시 토스트, `clearAllData()` 후엔 `saveDisabled`로 beforeunload flush 차단
+- **validateGraph 거부 규칙** (2026-11-12 강화): persons가 배열, 값이 null, 키≠person.id, null 간선, from===to, PARENT_OF 순환(`hasParentCycle`), childOrder가 객체가 아니거나 값이 문자열 배열이 아님 → 모두 false. 로드와 가져오기 양쪽에 적용되므로 **UI로 만들 수 있는 구조는 절대 거부하면 안 된다** (거부되면 사용자 데이터가 recovery 키로 밀려나 빈 가계도가 뜸). 월일 범위처럼 무해한 값은 일부러 느슨하게 둠
+- **TreeLayout 방어**: childOrder 값이 배열이 아니면 무시(`Array.isArray`), `findAncestorRoot`는 memo 캐시 — 조부모가 부모로도 등록된 격자 구조에서 경로 수가 피보나치로 폭발해 앱이 멈추던 문제
+- **FAB는 '나'만 있어도 표시**: 빈 상태 안내가 "+ 버튼"을 가리키는데 FAB가 `personCount > 1` 조건으로 숨겨져 템플릿 없이는 첫 가족을 못 넣던 버그(2026-04-24~11-12). 조건에 personCount를 다시 넣지 말 것
+- **ConfirmDialog**: `role="dialog" aria-modal` + ESC=취소 + 안드로이드 뒤로가기=취소. E2E는 `[role=dialog] button` 마지막이 확인 버튼
 - **안드로이드 뒤로가기** (`useAndroidBack`): App(탭·검색·추가/수정 폼·평가창), ConfirmDialog(취소), PlayHub, 각 게임에서 등록. 하위 단계만 바뀌는 화면은 3번째 인자 `key`로 재등록(바둑).
   조용한 되돌리기는 카운터+`history.go(-n)` 일괄 처리, 페이지 이탈 중(`beforeunload`)에는 호출 안 함 — 안 그러면 데이터 초기화의 reload가 취소됨
 - localStorage 5MB 제한 (가족 200명 ≈ 50KB, 충분)

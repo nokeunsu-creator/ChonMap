@@ -19,9 +19,19 @@ export function ConfirmDialog({ message, onConfirm, onCancel, confirmLabel = '�
   // 안드로이드 뒤로가기 = 취소 (TWA에서 앱이 바로 종료되지 않도록)
   useAndroidBack(true, onCancel);
 
+  // ESC = 취소 (다른 모달과 동일한 동작)
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onCancel(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
   return (
     <div
       onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-label={message}
       style={{
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(0,0,0,0.5)',

@@ -30,10 +30,31 @@ function writeGraph(graph: FamilyGraph): void {
   }
 }
 
-// 그래프 무결성 검증
+// PARENT_OF 간선이 순환(자기 조상이 자기 자손)을 이루면 true — 레이아웃·촌수 계산이 무한히 돌거나 틀어지므로 거부
+function hasParentCycle(children: Map<string, string[]>): boolean {
+  const state = new Map<string, 1 | 2>(); // 1=방문 중, 2=완료
+  for (const start of children.keys()) {
+    if (state.has(start)) continue;
+    const stack: { id: string; next: number }[] = [{ id: start, next: 0 }];
+    state.set(start, 1);
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      const kids = children.get(frame.id) || [];
+      if (frame.next >= kids.length) { state.set(frame.id, 2); stack.pop(); continue; }
+      const kid = kids[frame.next++];
+      const s = state.get(kid);
+      if (s === 1) return true;
+      if (s === undefined) { state.set(kid, 1); stack.push({ id: kid, next: 0 }); }
+    }
+  }
+  return false;
+}
+
+// 그래프 무결성 검증 — 저장본 로드와 JSON 가져오기 양쪽에서 사용.
+// UI로는 만들 수 없는 구조(키≠id, 자기 자신 간선, 부모 순환, childOrder 형식 오류)는 조작된 데이터로 보고 거부한다
 export function validateGraph(graph: FamilyGraph): boolean {
   if (!graph || typeof graph !== 'object') return false;
-  if (!graph.persons || typeof graph.persons !== 'object') return false;
+  if (!graph.persons || typeof graph.persons !== 'object' || Array.isArray(graph.persons)) return false;
   if (!Array.isArray(graph.edges)) return false;
   if (typeof graph.rootPersonId !== 'string') return false;
   if (!graph.persons[graph.rootPersonId]) return false;
@@ -42,15 +63,32 @@ export function validateGraph(graph: FamilyGraph): boolean {
   if (personCount === 0 || personCount > MAX_PERSONS) return false;
 
   // 엣지의 from/to가 실제 존재하는 사람인지 확인
+  const children = new Map<string, string[]>();
   for (const edge of graph.edges) {
-    if (!edge.type || !edge.from || !edge.to) return false;
+    if (!edge || typeof edge !== 'object') return false;
+    if (typeof edge.from !== 'string' || typeof edge.to !== 'string') return false;
+    if (edge.from === edge.to) return false;
     if (!graph.persons[edge.from] || !graph.persons[edge.to]) return false;
     if (edge.type !== 'PARENT_OF' && edge.type !== 'SPOUSE_OF') return false;
+    if (edge.type === 'PARENT_OF') {
+      if (!children.has(edge.from)) children.set(edge.from, []);
+      children.get(edge.from)!.push(edge.to);
+    }
+  }
+  if (hasParentCycle(children)) return false;
+
+  // childOrder: parentId → 문자열 배열만 허용 (TreeLayout이 .filter를 호출하므로 다른 타입이면 앱이 죽는다)
+  if (graph.childOrder !== undefined) {
+    if (!graph.childOrder || typeof graph.childOrder !== 'object' || Array.isArray(graph.childOrder)) return false;
+    for (const ids of Object.values(graph.childOrder)) {
+      if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string')) return false;
+    }
   }
 
-  // 각 Person 필드 검증
-  for (const person of Object.values(graph.persons)) {
-    if (typeof person.id !== 'string' || typeof person.name !== 'string') return false;
+  // 각 Person 필드 검증 (persons의 키와 person.id가 일치해야 간선·수정·삭제가 같은 사람을 가리킨다)
+  for (const [key, person] of Object.entries(graph.persons)) {
+    if (!person || typeof person !== 'object') return false;
+    if (person.id !== key || typeof person.name !== 'string') return false;
     if (person.gender !== 'M' && person.gender !== 'F') return false;
     if (person.name.length > 100) return false;
 
