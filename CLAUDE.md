@@ -237,6 +237,7 @@ npx vercel --prod --yes
 - **AdSense 라우팅 전략**: 광고 스크립트는 `/`(랜딩) + 정적 페이지(guide, about, chon/*)에만 삽입. SPA 셸(`/app/`)은 `noindex,follow`로 색인 회피하고 AdSense 스크립트도 제거됨 — SPA는 행동 화면이라 "콘텐츠 없는 화면" 정책 위반 사유였음. AD_SLOT은 AdSense 승인 후 채울 것
 - **TWA start_url 변경**: `manifest.json` `start_url`이 `/app/`. versionCode 7부터 `launchUrl: '/app/'`로 재빌드 완료. versionCode 6 이하 APK는 `/` 진입 시 랜딩 페이지가 나타남
 - **평점 유도 문구**: RatingDialog에 "별점 5점" 같은 특정 점수 요구 금지 (Play 평점·리뷰 정책). 중립 문구만 사용
-- **CSP 정책**: `vercel.json`에서 `'unsafe-eval'` 제거 완료. `'unsafe-inline'`은 AdSense 인라인 호출(`(adsbygoogle = ...).push({})`) 때문에 유지. 후속 강화는 nonce 도입(Vercel Edge Middleware) 필요
+- **CSP 정책**: `vercel.json`에서 `'unsafe-eval'` 제거 완료. `'unsafe-inline'`은 AdSense 인라인 호출(`(adsbygoogle = ...).push({})`) 때문에 유지. 후속 강화는 nonce 도입(Vercel Edge Middleware) 필요.
+  `https://*.adtrafficquality.google`(AdSense 무효 트래픽 검사 sodar 비콘)은 script/img/connect/frame-src에 모두 허용 — 막히면 라이브 콘솔에 CSP 위반이 찍히고 광고 품질 검증이 안 됨 (2026-11-12 추가)
 - **TwentyFour 평가기**: `new Function` 대신 Shunting-yard 기반 파서 사용 (`src/components/play/games/TwentyFour.tsx`). 정수/부동소수점, 단항 마이너스, 괄호 모두 지원. EPS=1e-6 비교로 부동소수점 오차 허용
 - **Service Worker 캐시 정책**: `sameOrigin && response.type === 'basic'`인 응답만 캐시. 외부(AdSense iframe 등) 응답은 캐시하지 않음. message 핸들러는 `event.origin === self.location.origin` 검증 + 입력 sanitize (배열 max 20개, 문자열 max 50자)
