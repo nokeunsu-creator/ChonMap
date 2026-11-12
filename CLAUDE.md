@@ -182,7 +182,7 @@ npm run preview   # 빌드 결과 미리보기
 npm run test      # Vitest 테스트 (105건)
 ```
 - **의존성 설치는 `npx npm@11 install`**: Node 22 기본 npm 10.9.0은 vitest 4.1.12의 peer 집합을 풀다가 `Cannot read properties of null (reading 'edgesOut')`로 죽는다 (lockfile 삭제해도 동일). npm 11은 정상
-- **브라우저 E2E**: Playwright 스크립트(58 시나리오: 랜딩/정적 페이지, 가족 추가, 기준 변경, undo/redo, 관계 검색, 내보내기/가져오기(조작 JSON·XSS 페이로드), PDF 팝업 이스케이프, 다크모드, 이미지 저장, 놀이 탭, 영속성, 저장소 변조)는 저장소 밖(세션 스크래치)에 있음. `npx vite preview --port 4173` 띄우고 `BASE=http://localhost:4173 node e2e.cjs`. 저장소 변조 시나리오는 앱이 떠 있으면 beforeunload 저장이 덮어쓰므로 `/privacy.html`에서 localStorage를 바꾼 뒤 `/app/`으로 이동해야 한다
+- **브라우저 E2E** `scripts/e2e.cjs` (Playwright, 58 시나리오: 랜딩/정적 페이지, 가족 추가, 기준 변경, undo/redo, 관계 검색, 내보내기/가져오기(조작 JSON·XSS 페이로드), PDF 팝업 이스케이프, 다크모드, 이미지 저장, 놀이 탭, 영속성, 저장소 변조). playwright는 devDependency가 아니므로 `npx -y npm@11 install --no-save playwright@1.65.0 && npx playwright install chromium` 후 `npx vite preview --port 4173` 띄우고 `node scripts/e2e.cjs` (라이브는 `BASE=https://chonmap.vercel.app`). 저장소 변조 시나리오는 앱이 떠 있으면 beforeunload 저장이 덮어쓰므로 `/privacy.html`에서 localStorage를 바꾼 뒤 `/app/`으로 이동해야 한다
 
 ## 배포
 ```bash
